@@ -1,0 +1,52 @@
+[
+  {
+    "username": "alice_smith",
+    "email": "alice@example.com",
+    "password": "hashedPassword123",
+    "preferences": {
+      "theme": "dark",
+      "notifications": true,
+      "language": "en"
+    }
+  },
+  {
+    "username": "bob_jones",
+    "email": "bob@example.com",
+    "password": "hashedPassword456",
+    "preferences": {
+      "theme": "light",
+      "notifications": false,
+      "language": "en"
+    }
+  },
+  {
+    "username": "carol_white",
+    "email": "carol@example.com",
+    "password": "hashedPassword789",
+    "preferences": {
+      "theme": "dark",
+      "notifications": true,
+      "language": "fr"
+    }
+  },
+  {
+    "username": "david_brown",
+    "email": "david@example.com",
+    "password": "hashedPassword012",
+    "preferences": {
+      "theme": "light",
+      "notifications": true,
+      "language": "en"
+    }
+  },
+  {
+    "username": "emma_davis",
+    "email": "emma@example.com",
+    "password": "hashedPassword345",
+    "preferences": {
+      "theme": "dark",
+      "notifications": false,
+      "language": "en"
+    }
+  }
+]

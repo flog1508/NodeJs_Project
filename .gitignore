@@ -1,0 +1,24 @@
+# Node
+node_modules/
+.env
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+# Logs
+logs
+*.log
+logs/**/*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+dist/
+coverage/
+
+# Data exports and seeds (don't commit large generated files)
+data/exports/
+
+# VSCode
+.vscode/

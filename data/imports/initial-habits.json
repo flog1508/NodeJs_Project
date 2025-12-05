@@ -1,0 +1,56 @@
+[
+  {
+    "userId": "user1",
+    "title": "Morning Exercise",
+    "description": "30 minutes of workout every morning",
+    "frequency": "daily",
+    "category": "Health",
+    "goal": 30,
+    "isArchived": false
+  },
+  {
+    "userId": "user1",
+    "title": "Read a Book",
+    "description": "Read for 30 minutes before bed",
+    "frequency": "daily",
+    "category": "Learning",
+    "goal": 30,
+    "isArchived": false
+  },
+  {
+    "userId": "user1",
+    "title": "Meditation",
+    "description": "10 minutes meditation session",
+    "frequency": "daily",
+    "category": "Wellness",
+    "goal": 10,
+    "isArchived": false
+  },
+  {
+    "userId": "user2",
+    "title": "Coding Practice",
+    "description": "Practice coding for 1 hour",
+    "frequency": "daily",
+    "category": "Learning",
+    "goal": 60,
+    "isArchived": false
+  },
+  {
+    "userId": "user2",
+    "title": "Run 5km",
+    "description": "Running routine",
+    "frequency": "weekly",
+    "category": "Health",
+    "goal": 5,
+    "isArchived": false
+  },
+  {
+    "userId": "user3",
+    "title": "Yoga",
+    "description": "Yoga session",
+    "frequency": "daily",
+    "category": "Wellness",
+    "goal": 45,
+    "isArchived": false
+  }
+]
