@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Habit Tracker - Test API</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    h1 {
+      color: #333;
+    }
+    .section {
+      background: white;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    input, button {
+      padding: 8px;
+      margin: 5px;
+      font-size: 14px;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .result {
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 3px;
+      max-height: 200px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎯 Habit Tracker - Test API</h1>
+
+  <!-- Créer un utilisateur -->
+  <div class="section">
+    <h2>1. Créer un utilisateur</h2>
+    <input type="text" id="username" placeholder="Username" value="TestUser">
+    <input type="email" id="email" placeholder="Email" value="test@example.com">
+    <input type="password" id="password" placeholder="Password" value="secret123">
+    <button onclick="createUser()">Créer</button>
+    <div id="createResult" class="result"></div>
+  </div>
+
+  <!-- Rechercher des utilisateurs -->
+  <div class="section">
+    <h2>2. Rechercher des utilisateurs</h2>
+    <input type="text" id="searchQuery" placeholder="Rechercher (optionnel)">
+    <input type="number" id="limit" placeholder="Limite" value="5">
+    <button onclick="searchUsers()">Rechercher</button>
+    <div id="searchResult" class="result"></div>
+  </div>
+
+  <!-- Modifier un utilisateur -->
+  <div class="section">
+    <h2>3. Modifier un utilisateur</h2>
+    <input type="text" id="userId" placeholder="ID utilisateur">
+    <input type="text" id="newUsername" placeholder="Nouveau username">
+    <button onclick="updateUser()">Modifier</button>
+    <div id="updateResult" class="result"></div>
+  </div>
+
+  <!-- Obtenir les stats d'un utilisateur -->
+  <div class="section">
+    <h2>4. Statistiques utilisateur</h2>
+    <input type="text" id="statsUserId" placeholder="ID utilisateur">
+    <button onclick="getUserStats()">Charger Stats</button>
+    <div id="statsResult" class="result"></div>
+  </div>
+
+  <script>
+    const API_URL = "http://localhost:5000/api";
+
+    // Créer un utilisateur
+    async function createUser() {
+      const username = document.getElementById("username").value;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        const response = await fetch(`${API_URL}/users/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, email, password })
+        });
+        const data = await response.json();
+        document.getElementById("createResult").textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        document.getElementById("createResult").textContent = "Erreur: " + error.message;
+      }
+    }
+
+    // Rechercher des utilisateurs
+    async function searchUsers() {
+      const search = document.getElementById("searchQuery").value;
+      const limit = document.getElementById("limit").value;
+
+      try {
+        const response = await fetch(`${API_URL}/users/search?search=${search}&limit=${limit}`);
+        const data = await response.json();
+        document.getElementById("searchResult").textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        document.getElementById("searchResult").textContent = "Erreur: " + error.message;
+      }
+    }
+
+    // Modifier un utilisateur
+    async function updateUser() {
+      const userId = document.getElementById("userId").value;
+      const newUsername = document.getElementById("newUsername").value;
+
+      try {
+        const response = await fetch(`${API_URL}/users/${userId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: newUsername })
+        });
+        const data = await response.json();
+        document.getElementById("updateResult").textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        document.getElementById("updateResult").textContent = "Erreur: " + error.message;
+      }
+    }
+
+    // Obtenir les stats
+    async function getUserStats() {
+      const userId = document.getElementById("statsUserId").value;
+
+      try {
+        const response = await fetch(`${API_URL}/users/${userId}/stats`);
+        const data = await response.json();
+        document.getElementById("statsResult").textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        document.getElementById("statsResult").textContent = "Erreur: " + error.message;
+      }
+    }
+  </script>
+</body>
+</html>

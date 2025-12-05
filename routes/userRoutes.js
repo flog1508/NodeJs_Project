@@ -174,7 +174,7 @@ router.get('/:id/stats', async (req, res) => {
     const stats = await User.aggregate([
       // Étape 1 : Filtrer l'utilisateur spécifique
       {
-        $match: { _id: mongoose.Types.ObjectId(id) }
+        $match: { _id: new mongoose.Types.ObjectId(id) }
       },
 
       // Étape 2 : Jointure avec la collection Habit ($lookup)
@@ -315,43 +315,64 @@ router.get('/:id/stats', async (req, res) => {
 });
 
 /**
- * BONUS - PUT /api/users/:id/preferences
- * Mettre à jour les préférences utilisateur
+ * PUT /api/users/:id
+ * Mettre à jour un utilisateur (username, email, password, preferences)
+ * - Valide l'email si fourni
+ * - Hache le mot de passe si fourni
+ * - Vérifie l'unicité pour email/username
  */
-router.put('/:id/preferences', async (req, res) => {
+router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { theme, notifications, language } = req.body;
+    const { username, email, password, preferences, isActive } = req.body;
 
+    // Construire l'objet d'update de manière sécurisée
     const updates = {};
-    if (theme) updates['preferences.theme'] = theme;
-    if (notifications !== undefined) updates['preferences.notifications'] = notifications;
-    if (language) updates['preferences.language'] = language;
 
-    const user = await User.findByIdAndUpdate(
-      id,
-      { $set: updates },
-      { new: true, runValidators: true }
-    ).select('-password');
+    if (username) updates.username = validator.trim(username);
 
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: 'Utilisateur non trouvé'
-      });
+    if (email) {
+      if (!validator.isEmail(email)) {
+        return res.status(400).json({ success: false, error: 'Email invalide' });
+      }
+      updates.email = validator.normalizeEmail(email);
     }
 
-    res.json({
-      success: true,
-      message: 'Préférences mises à jour',
-      data: user
-    });
+    if (typeof isActive === 'boolean') updates.isActive = isActive;
+
+    if (preferences) updates.preferences = preferences;
+
+    // Si on change le mot de passe, le hacher
+    if (password) {
+      if (!validator.isLength(password, { min: 6 })) {
+        return res.status(400).json({ success: false, error: 'Le mot de passe doit contenir au moins 6 caractères' });
+      }
+      const salt = await bcrypt.genSalt(10);
+      updates.password = await bcrypt.hash(password, salt);
+    }
+
+    // Vérifier unicité (email/username) en excluant l'utilisateur courant
+    if (updates.email || updates.username) {
+      const conflict = await User.findOne({
+        $or: [
+          updates.email ? { email: updates.email } : null,
+          updates.username ? { username: updates.username } : null
+        ].filter(Boolean),
+        _id: { $ne: id }
+      });
+      if (conflict) {
+        return res.status(400).json({ success: false, error: 'Email ou username déjà utilisé par un autre utilisateur' });
+      }
+    }
+
+    const user = await User.findByIdAndUpdate(id, { $set: updates }, { new: true, runValidators: true }).select('-password');
+
+    if (!user) return res.status(404).json({ success: false, error: 'Utilisateur non trouvé' });
+
+    res.json({ success: true, message: 'Utilisateur mis à jour', data: user });
 
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
