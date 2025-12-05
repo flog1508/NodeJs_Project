@@ -1,71 +1,69 @@
+// server.js
 import express from 'express';
 import dotenv from 'dotenv';
+import cors from 'cors';
+import morgan from 'morgan';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// 🔗 Connexion MongoDB
 import connectDB from './config/db.js';
-import errorHandler from './middlewares/errorHandler.js';
+
+// 🛣️ Routes
+import habitRoutes from './routes/Habitroutes.js';   // Étudiant 2 – Habits
+import userRoutes from './routes/userRoutes.js';     // Étudiant 1 – Users
+
+// 🧱 Middlewares d’erreurs
 import notFound from './middlewares/notFound.js';
+import errorHandler from './middlewares/errorHandler.js';
 
-// Import des routes
-import userRoutes from './routes/userRoutes.js';
-import habitRoutes from './routes/Habitroutes.js';
-import statsRoutes from './routes/statsRoutes.js';
-
-// Configuration
 dotenv.config();
+
 const app = express();
 const PORT = process.env.PORT || 5000;
+const ENV = process.env.NODE_ENV || 'development';
 
-// Connexion à MongoDB
+// ⚙️ Gestion de __dirname avec ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// 🔌 Connexion à la base MongoDB
 connectDB();
 
-// Middlewares
+// 🌍 Middlewares globaux
+app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(morgan('dev'));
 
-// CORS (DOIT être avant les routes et express.static)
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  next();
-});
+// 📄 Servir les fichiers statiques du dossier /public
+// -> http://localhost:5000/ affichera public/index.html
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Servir les fichiers statiques (HTML, CSS, JS)
-app.use(express.static('public'));
+// (optionnel) évite l’erreur /favicon.ico dans la console
+app.get('/favicon.ico', (req, res) => res.status(204).end());
 
-// Route de test
-app.get('/', (req, res) => {
-  res.json({
-    message: ' API Habit Tracker v1.0',
-    status: 'operational',
-    endpoints: {
-      users: '/api/users',
-      habits: '/api/habits',
-      stats: '/api/stats'
-    }
+// ✅ Route de santé pour tester rapidement l’API
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'API Habit Tracker is running!'
   });
 });
 
-// Routes principales
-app.use('/api/users', userRoutes);
+// 🧭 Montage des routes API
+// Étudiant 2 – Habit Management
 app.use('/api/habits', habitRoutes);
-app.use('/api/stats', statsRoutes);
 
-// Middlewares d'erreurs (à la fin)
+// Étudiant 1 – Users
+app.use('/api/users', userRoutes);
+
+// ❌ 404 + gestion des erreurs (toujours à la fin)
 app.use(notFound);
 app.use(errorHandler);
 
-// Démarrage du serveur
+// 🚀 Lancement du serveur
 app.listen(PORT, () => {
-  console.log(` Serveur démarré sur le port ${PORT}`);
-  console.log(` Environnement: ${process.env.NODE_ENV || 'development'}`);
-  console.log(` URL: http://localhost:${PORT}`);
-});
-
-// Gestion des erreurs non capturées
-process.on('unhandledRejection', (err) => {
-  console.error(' Erreur non gérée:', err);
-  process.exit(1);
+  console.log(`Serveur démarré sur le port ${PORT}`);
+  console.log(`Environnement: ${ENV}`);
+  console.log(`URL: http://localhost:${PORT}`);
 });
