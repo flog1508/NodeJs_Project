@@ -8,6 +8,7 @@ import notFound from './middlewares/notFound.js';
 import userRoutes from './routes/userRoutes.js';
 import habitRoutes from './routes/Habitroutes.js';
 import statsRoutes from './routes/statsRoutes.js';
+import analyticsRoutes from './routes/analyticsRoutes.js';
 
 // Configuration
 dotenv.config();
@@ -63,3 +64,10 @@ process.on('unhandledRejection', (err) => {
   console.error(' Erreur non gérée:', err);
   process.exit(1);
 });
+
+
+// Routes pour la gestion des habitudes
+app.use('/api/habits', habitRoutes);
+
+// Routes pour les statistiques et analyses avancées
+app.use('/api/analytics', analyticsRoutes);
