@@ -2,7 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import User from '../models/User.js';
-import { Habit } from '../models/Habit.js';
+import {Habit}  from '../models/Habit.js';
 import validator from 'validator';
 import fs from 'fs';
 import path from 'path';
@@ -19,16 +19,6 @@ const router = express.Router();
  * ROUTE 1 - POST /api/users/register
  * Créer un nouvel utilisateur avec validation complète
  * Body: { username, email, password, preferences }
- */
-/**
- * POST /api/users/register
- * Create a new user with validation and password hashing.
- * Steps:
- * 1) Validate required fields (username, email, password)
- * 2) Normalize and validate email
- * 3) Check uniqueness for email and username
- * 4) Hash the password with bcrypt
- * 5) Create the user and log the event to `data/user-logs.json`
  */
 router.post('/register', async (req, res) => {
   try {
@@ -81,7 +71,6 @@ router.post('/register', async (req, res) => {
         const existingLogs = fs.readFileSync(logPath, 'utf-8');
         logs = JSON.parse(existingLogs);
       } catch (e) {
-        // If parsing fails, start with an empty array (avoid crashing the route)
         logs = [];
       }
     }
@@ -92,7 +81,6 @@ router.post('/register', async (req, res) => {
     res.status(201).json({ success: true, message: 'Utilisateur créé avec succès', data: { id: user._id, username: user.username, email: user.email, preferences: user.preferences, createdAt: user.createdAt } });
 
   } catch (error) {
-    // Generic error handler for unexpected exceptions
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -138,7 +126,7 @@ router.get('/search', async (req, res) => {
       .sort({ [sortBy]: sortOrder })
       .skip(skip)
       .limit(Number(limit))
-      .select('-password'); // Ne pas retourner le password
+      .select('-password');
 
     // Compte total pour la pagination
     const total = await User.countDocuments(query);
@@ -315,18 +303,14 @@ router.get('/:id/stats', async (req, res) => {
 });
 
 /**
- * PUT /api/users/:id
+ * ROUTE 4 - PUT /api/users/:id
  * Mettre à jour un utilisateur (username, email, password, preferences)
- * - Valide l'email si fourni
- * - Hache le mot de passe si fourni
- * - Vérifie l'unicité pour email/username
  */
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { username, email, password, preferences, isActive } = req.body;
 
-    // Construire l'objet d'update de manière sécurisée
     const updates = {};
 
     if (username) updates.username = validator.trim(username);
@@ -342,7 +326,6 @@ router.put('/:id', async (req, res) => {
 
     if (preferences) updates.preferences = preferences;
 
-    // Si on change le mot de passe, le hacher
     if (password) {
       if (!validator.isLength(password, { min: 6 })) {
         return res.status(400).json({ success: false, error: 'Le mot de passe doit contenir au moins 6 caractères' });
@@ -351,7 +334,6 @@ router.put('/:id', async (req, res) => {
       updates.password = await bcrypt.hash(password, salt);
     }
 
-    // Vérifier unicité (email/username) en excluant l'utilisateur courant
     if (updates.email || updates.username) {
       const conflict = await User.findOne({
         $or: [
@@ -377,7 +359,7 @@ router.put('/:id', async (req, res) => {
 });
 
 /**
- * BONUS - GET /api/users/stats/global
+ * ROUTE 5 - GET /api/users/stats/global
  * Statistiques globales de tous les utilisateurs (agrégation)
  */
 router.get('/stats/global', async (req, res) => {
@@ -385,12 +367,7 @@ router.get('/stats/global', async (req, res) => {
     const stats = await User.aggregate([
       {
         $facet: {
-          // Total utilisateurs
-          totalUsers: [
-            { $count: 'count' }
-          ],
-          
-          // Utilisateurs par mois
+          totalUsers: [{ $count: 'count' }],
           usersByMonth: [
             {
               $group: {
@@ -404,8 +381,6 @@ router.get('/stats/global', async (req, res) => {
             { $sort: { '_id.year': -1, '_id.month': -1 } },
             { $limit: 12 }
           ],
-
-          // Utilisateurs actifs vs inactifs
           activeStatus: [
             {
               $group: {
@@ -414,8 +389,6 @@ router.get('/stats/global', async (req, res) => {
               }
             }
           ],
-
-          // Préférences de thème
           themePreferences: [
             {
               $group: {
@@ -438,6 +411,162 @@ router.get('/stats/global', async (req, res) => {
       success: false,
       error: error.message
     });
+  }
+});
+
+/**
+ * ROUTE 6 - GET /api/users/import
+ * LECTURE DE FICHIER JSON : Importer des utilisateurs depuis initial-users.json
+ */
+router.get('/import', async (req, res) => {
+  try {
+    const dataPath = path.join(process.cwd(), 'data', 'imports', 'initial-users.json');
+    
+    if (!fs.existsSync(dataPath)) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Fichier initial-users.json non trouvé dans data/imports/' 
+      });
+    }
+
+    const jsonData = fs.readFileSync(dataPath, 'utf-8');
+    const usersData = JSON.parse(jsonData);
+
+    const usersToImport = [];
+    for (const userData of usersData) {
+      const exists = await User.findOne({ 
+        $or: [
+          { email: validator.normalizeEmail(userData.email) },
+          { username: validator.trim(userData.username) }
+        ]
+      });
+
+      if (!exists) {
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(userData.password, salt);
+        
+        usersToImport.push({
+          username: validator.trim(userData.username),
+          email: validator.normalizeEmail(userData.email),
+          password: hashedPassword,
+          preferences: userData.preferences || {}
+        });
+      }
+    }
+
+    if (usersToImport.length === 0) {
+      return res.json({ 
+        success: true, 
+        message: 'Tous les utilisateurs existent déjà',
+        imported: 0 
+      });
+    }
+
+    const imported = await User.insertMany(usersToImport);
+
+    // Logger l'import
+    const dataDir = path.join(process.cwd(), 'data');
+    const logPath = path.join(dataDir, 'user-logs.json');
+    const logData = { 
+      action: 'USERS_IMPORTED', 
+      count: imported.length, 
+      timestamp: new Date().toISOString() 
+    };
+
+    let logs = [];
+    if (fs.existsSync(logPath)) {
+      try {
+        const existingLogs = fs.readFileSync(logPath, 'utf-8');
+        logs = JSON.parse(existingLogs);
+      } catch (e) {
+        logs = [];
+      }
+    }
+    logs.push(logData);
+    fs.writeFileSync(logPath, JSON.stringify(logs, null, 2));
+
+    res.json({ 
+      success: true, 
+      message: `${imported.length} utilisateurs importés avec succès`,
+      imported: imported.map(u => ({ id: u._id, username: u.username, email: u.email }))
+    });
+
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * ROUTE 7 - GET /api/users/stats/export
+ * ÉCRITURE DE FICHIER JSON : Exporter les statistiques dans un fichier
+ */
+router.get('/stats/export', async (req, res) => {
+  try {
+    const stats = await User.aggregate([
+      {
+        $facet: {
+          totalUsers: [{ $count: 'count' }],
+          usersByMonth: [
+            {
+              $group: {
+                _id: {
+                  year: { $year: '$createdAt' },
+                  month: { $month: '$createdAt' }
+                },
+                count: { $sum: 1 }
+              }
+            },
+            { $sort: { '_id.year': -1, '_id.month': -1 } },
+            { $limit: 12 }
+          ],
+          activeStatus: [
+            {
+              $group: {
+                _id: '$isActive',
+                count: { $sum: 1 }
+              }
+            }
+          ],
+          recentUsers: [
+            { $sort: { createdAt: -1 } },
+            { $limit: 10 },
+            { $project: { username: 1, email: 1, createdAt: 1 } }
+          ]
+        }
+      }
+    ]);
+
+    const exportData = {
+      exportDate: new Date().toISOString(),
+      statistics: stats[0],
+      metadata: {
+        totalUsersCount: stats[0].totalUsers[0]?.count || 0,
+        exportedBy: 'API Habit Tracker',
+        version: '1.0'
+      }
+    };
+
+    const exportsDir = path.join(process.cwd(), 'data', 'exports');
+    if (!fs.existsSync(exportsDir)) {
+      fs.mkdirSync(exportsDir, { recursive: true });
+    }
+
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filename = `user-stats-${timestamp}.json`;
+    const exportPath = path.join(exportsDir, filename);
+
+    fs.writeFileSync(exportPath, JSON.stringify(exportData, null, 2));
+
+    res.json({ 
+      success: true, 
+      message: 'Statistiques exportées avec succès',
+      file: filename,
+      path: exportPath,
+      data: exportData
+    });
+
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
