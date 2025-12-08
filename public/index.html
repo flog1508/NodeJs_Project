@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Habit Tracker - Test API</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 30px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      font-size: 2.5em;
+    }
+    .section {
+      background: white;
+      padding: 25px;
+      margin: 20px 0;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .section h2 {
+      color: #667eea;
+      margin-bottom: 15px;
+      border-bottom: 2px solid #667eea;
+      padding-bottom: 10px;
+    }
+    input, button {
+      padding: 10px;
+      margin: 5px;
+      font-size: 14px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+    }
+    input {
+      flex: 1;
+      min-width: 200px;
+    }
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      transition: transform 0.2s;
+      padding: 10px 20px;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    .result {
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin-top: 15px;
+      border-radius: 5px;
+      max-height: 300px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+    .input-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎯 Habit Tracker - Interface de Test API</h1>
+
+  <!-- ================================ -->
+  <!-- 🔹 PARTIE ÉTUDIANT 1 : USERS -->
+  <!-- ================================ -->
+
+  <div class="section">
+    <h2>1️⃣ Créer un utilisateur</h2>
+    <div class="input-row">
+      <input type="text" id="username" placeholder="Username" value="TestUser">
+      <input type="email" id="email" placeholder="Email" value="test@example.com">
+      <input type="password" id="password" placeholder="Password" value="secret123">
+      <button onclick="createUser()">Créer</button>
+    </div>
+    <div id="createResult" class="result"></div>
+  </div>
+
+  <div class="section">
+    <h2>2️⃣ Rechercher des utilisateurs</h2>
+    <div class="input-row">
+      <input type="text" id="searchQuery" placeholder="Rechercher par nom ou email">
+      <input type="number" id="limit" placeholder="Limite" value="5">
+      <button onclick="searchUsers()">Rechercher</button>
+    </div>
+    <div id="searchResult" class="result"></div>
+  </div>
+
+  <div class="section">
+    <h2>3️⃣ Modifier un utilisateur</h2>
+    <div class="input-row">
+      <input type="text" id="userId" placeholder="ID utilisateur">
+      <input type="text" id="newUsername" placeholder="Nouveau username">
+      <button onclick="updateUser()">Modifier</button>
+    </div>
+    <div id="updateResult" class="result"></div>
+  </div>
+
+  <div class="section">
+    <h2>4️⃣ Statistiques utilisateur (Agrégation)</h2>
+    <div class="input-row">
+      <input type="text" id="statsUserId" placeholder="ID utilisateur">
+      <button onclick="getUserStats()">📊 Charger Stats</button>
+    </div>
+    <div id="statsResult" class="result"></div>
+  </div>
+
+  <div class="section">
+    <h2>5️⃣ Statistiques globales</h2>
+    <div class="input-row">
+      <button onclick="getGlobalStats()">📈 Stats Globales</button>
+    </div>
+    <div id="globalStatsResult" class="result"></div>
+  </div>
+
+  <div class="section">
+    <h2>6️⃣ Importer des utilisateurs (Lecture JSON)</h2>
+    <div class="input-row">
+      <button onclick="importUsers()">📥 Importer depuis initial-users.json</button>
+    </div>
+    <div id="importResult" class="result"></div>
+  </div>
+
+  <div class="section">
+    <h2>7️⃣ Exporter les statistiques (Écriture JSON)</h2>
+    <div class="input-row">
+      <button onclick="exportStats()">📤 Exporter vers fichier JSON</button>
+    </div>
+    <div id="exportResult" class="result"></div>
+  </div>
+
+  <!-- ================================== -->
+  <!-- 🔹 PARTIE ÉTUDIANT 2 : HABITS -->
+  <!-- ================================== -->
+
+  <div class="section">
+    <h2>8️⃣ Créer une habitude</h2>
+    <div class="input-row">
+      <input type="text" id="habitUserId" placeholder="User ID">
+      <input type="text" id="habitTitle" placeholder="Titre">
+      <input type="text" id="habitCategory" placeholder="Catégorie (ex: health)">
+      <input type="text" id="habitDesc" placeholder="Description">
+      <input type="text" id="habitFreq" placeholder="Fréquence (daily, weekly...)">
+      <button onclick="createHabit()">Créer Habitude</button>
+    </div>
+    <div id="habitCreateResult" class="result"></div>
+  </div>
+
+  <div class="section">
+    <h2>9️⃣ Filtrer les habitudes</h2>
+    <div class="input-row">
+      <input type="text" id="filterUserId" placeholder="User ID (optionnel)">
+      <input type="text" id="filterCategory" placeholder="Catégorie (optionnel)">
+      <input type="text" id="filterSearch" placeholder="Recherche texte">
+      <input type="number" id="filterLimit" placeholder="Limite" value="5">
+      <button onclick="filterHabits()">🔍 Rechercher Habitudes</button>
+    </div>
+    <div id="habitFilterResult" class="result"></div>
+  </div>
+
+  <div class="section">
+    <h2>🔟 Statistiques par catégorie (Agrégation)</h2>
+    <div class="input-row">
+      <button onclick="getHabitStats()">📊 Charger Statistiques</button>
+    </div>
+    <div id="habitStatsResult" class="result"></div>
+  </div>
+
+  <!-- JAVASCRIPT API CALLS -->
+  <script>
+    const API_URL = "http://localhost:5000/api";
+
+    /* ==========================
+       ÉTUDIANT 1 : USERS
+    ========================== */
+
+    async function createUser() {
+      const username = document.getElementById("username").value;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        const response = await fetch(`${API_URL}/users/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, email, password })
+        });
+        const data = await response.json();
+        document.getElementById("createResult").textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        document.getElementById("createResult").textContent = "Erreur: " + error.message;
+      }
+    }
+
+    async function searchUsers() {
+      const search = document.getElementById("searchQuery").value;
+      const limit = document.getElementById("limit").value;
+
+      try {
+        const response = await fetch(`${API_URL}/users/search?search=${search}&limit=${limit}`);
+        const data = await response.json();
+        document.getElementById("searchResult").textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        document.getElementById("searchResult").textContent = "Erreur: " + error.message;
+      }
+    }
+
+    async function updateUser() {
+      const userId = document.getElementById("userId").value;
+      const newUsername = document.getElementById("newUsername").value;
+
+      try {
+        const response = await fetch(`${API_URL}/users/${userId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: newUsername })
+        });
+        const data = await response.json();
+        document.getElementById("updateResult").textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        document.getElementById("updateResult").textContent = "Erreur: " + error.message;
+      }
+    }
+
+    async function getUserStats() {
+      const userId = document.getElementById("statsUserId").value;
+
+      if (!userId) {
+        alert("Veuillez entrer un ID utilisateur");
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/users/${userId}/stats`);
+        const data = await response.json();
+        document.getElementById("statsResult").textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        document.getElementById("statsResult").textContent = "Erreur: " + error.message;
+      }
+    }
+
+    async function getGlobalStats() {
+      try {
+        const response = await fetch(`${API_URL}/users/stats/global`);
+        const data = await response.json();
+        document.getElementById("globalStatsResult").textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        document.getElementById("globalStatsResult").textContent = "Erreur: " + error.message;
+      }
+    }
+
+    async function importUsers() {
+      try {
+        const response = await fetch(`${API_URL}/users/import`);
+        const data = await response.json();
+        document.getElementById("importResult").textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        document.getElementById("importResult").textContent = "Erreur: " + error.message;
+      }
+    }
+
+    async function exportStats() {
+      try {
+        const response = await fetch(`${API_URL}/users/stats/export`);
+        const data = await response.json();
+        document.getElementById("exportResult").textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        document.getElementById("exportResult").textContent = "Erreur: " + error.message;
+      }
+    }
+
+    /* ==========================
+       ÉTUDIANT 2 : HABITS
+    ========================== */
+
+    async function createHabit() {
+      const user = document.getElementById("habitUserId").value;
+      const title = document.getElementById("habitTitle").value;
+      const category = document.getElementById("habitCategory").value;
+      const description = document.getElementById("habitDesc").value;
+      const frequency = document.getElementById("habitFreq").value;
+
+      const body = { user, title, category, description, frequency };
+
+      try {
+        const response = await fetch(`${API_URL}/habits`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const data = await response.json();
+        document.getElementById("habitCreateResult").textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        document.getElementById("habitCreateResult").textContent = "Erreur: " + error.message;
+      }
+    }
+
+    async function filterHabits() {
+      const userId = document.getElementById("filterUserId").value;
+      const category = document.getElementById("filterCategory").value;
+      const search = document.getElementById("filterSearch").value;
+      const limit = document.getElementById("filterLimit").value;
+
+      const query = new URLSearchParams({ userId, category, search, limit });
+
+      try {
+        const response = await fetch(`${API_URL}/habits/filters?${query}`);
+        const data = await response.json();
+        document.getElementById("habitFilterResult").textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        document.getElementById("habitFilterResult").textContent = "Erreur: " + error.message;
+      }
+    }
+
+    async function getHabitStats() {
+      try {
+        const response = await fetch(`${API_URL}/habits/analytics/categories`);
+        const data = await response.json();
+        document.getElementById("habitStatsResult").textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        document.getElementById("habitStatsResult").textContent = "Erreur: " + error.message;
+      }
+    }
+  </script>
+</body>
+</html>
