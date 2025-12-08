@@ -26,7 +26,7 @@ const habitlogSchema = new mongoose.Schema({
   // Date au format YYYY-MM-DD pour faciliter les requêtes quotidiennes
   dateString: {
     type: String,
-    required: true,
+
     index: true
   },
   

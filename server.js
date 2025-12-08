@@ -8,9 +8,8 @@ import { fileURLToPath } from 'url';
 
 // Import des routes
 import userRoutes from './routes/userRoutes.js';
-import habitRoutes from './routes/habitroutes.js';
+import habitRoutes from './routes/Habitroutes.js';
 import statsRoutes from './routes/statsRoutes.js';
-import analyticsRoutes from './routes/analyticsRoutes.js';
 import habitLogRoutes from './routes/HabitLogRoutes.js';
 
 // Import des middlewares
@@ -49,7 +48,6 @@ const connectDB = async () => {
 app.use('/api/users', userRoutes);
 app.use('/api/habits', habitRoutes);
 app.use('/api/stats', statsRoutes);
-app.use('/api/analytics', analyticsRoutes);
 app.use('/api/habitlogs', habitLogRoutes);
 
 // Route de test API

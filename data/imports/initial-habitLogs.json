@@ -1,0 +1,28 @@
+[
+  {
+    "habit": "693732859407a4ee04ee89da",
+    "user": "69371851d129f1432fe7b8cb",
+    "date": "2025-12-01",
+    "completed": true,
+    "notes": "Excellente séance de sport",
+    "mood": "excellent",
+    "duration": 45
+  },
+  {
+    "habit": "693732859407a4ee04ee89da",
+    "user": "69371851d129f1432fe7b8cb",
+    "date": "2025-12-02",
+    "completed": true,
+    "notes": "Bonne séance",
+    "mood": "bon",
+    "duration": 30
+  },
+  {
+    "habit": "693732859407a4ee04ee89da",
+    "user": "69371851d129f1432fe7b8cb",
+    "date": "2025-12-03",
+    "completed": false,
+    "notes": "Trop fatigué aujourd'hui",
+    "mood": "difficile"
+  }
+]

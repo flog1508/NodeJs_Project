@@ -86,65 +86,65 @@ class HabitController {
    * Exigence prof : Route de lecture avancée
    */
   static async search(req, res) {
-    try {
-      const {
-        user,
-        category,
-        frequency,
-        isActive,
-        search = '',
-        page = 1,
-        limit = 10,
-        sortBy = 'createdAt',
-        order = 'desc'
-      } = req.query;
+  try {
+    const {
+      user,
+      category,
+      frequency,
+      isActive,
+      search = '',
+      page = 1,
+      limit = 10,
+      sortBy = 'createdAt',
+      order = 'desc'  // ✅ CORRIGÉ
+    } = req.query;
 
-      // Construction de la query
-      const query = {};
+    // Construction de la query
+    const query = {};
 
-      if (user) query.user = user;
-      if (category) query.category = category;
-      if (frequency) query.frequency = frequency;
-      if (isActive !== undefined) query.isActive = isActive === 'true';
+    if (user) query.user = user;
+    if (category) query.category = category;
+    if (frequency) query.frequency = frequency;
+    if (isActive !== undefined) query.isActive = isActive === 'true';
 
-      // Recherche textuelle
-      if (search) {
-        query.$or = [
-          { title: { $regex: search, $options: 'i' } },
-          { description: { $regex: search, $options: 'i' } }
-        ];
-      }
-
-      // Pagination
-      const skip = (page - 1) * limit;
-      const sortOrder = order === 'asc' ? 1 : -1;
-
-      const habits = await Habit.find(query)
-        .populate('user', 'username email')
-        .sort({ [sortBy]: sortOrder })
-        .skip(skip)
-        .limit(Number(limit));
-
-      const total = await Habit.countDocuments(query);
-
-      res.json({
-        success: true,
-        data: habits,
-        pagination: {
-          currentPage: Number(page),
-          totalPages: Math.ceil(total / Number(limit)),
-          totalHabits: total,
-          limit: Number(limit)
-        }
-      });
-
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        error: error.message
-      });
+    // Recherche textuelle
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
     }
+
+    // Pagination
+    const skip = (page - 1) * limit;
+    const sortOrder = order === 'asc' ? 1 : -1;
+
+    const habits = await Habit.find(query)
+      .populate('user', 'username email')
+      .sort({ [sortBy]: sortOrder })
+      .skip(skip)
+      .limit(Number(limit));
+
+    const total = await Habit.countDocuments(query);
+
+    res.json({
+      success: true,
+      data: habits,
+      pagination: {
+        currentPage: Number(page),
+        totalPages: Math.ceil(total / Number(limit)),
+        totalHabits: total,
+        limit: Number(limit)
+      }
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
   }
+}
 
   /**
    * ROUTE 3 (GET) - Agrégation MongoDB : Stats par catégorie

@@ -1,370 +1,352 @@
-# 🎯 Habit Tracker - Backend API
+#  Habit Tracker - Backend Node.js & MongoDB
 
-> **Projet Backend Node.js & MongoDB - Skills4Mind**  
-> API REST complète pour le suivi d'habitudes quotidiennes
+> **API REST complète de suivi d'habitudes quotidiennes**  
+> Projet Backend Node.js & MongoDB - Skills4Mind - M.TAALBI RABAH
 
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-7.0+-green.svg)](https://www.mongodb.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-6.0+-green.svg)](https://www.mongodb.com/)
 [![Express](https://img.shields.io/badge/Express-4.22-blue.svg)](https://expressjs.com/)
-[![License](https://img.shields.io/badge/License-ISC-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-ISC-yellow.svg)](LICENSE)
 
 ---
 
 ## 📋 Table des matières
-- [Présentation](#-présentation)
+
+- [Description du projet](#-description-du-projet)
 - [Architecture](#-architecture)
 - [Modèle de données](#-modèle-de-données)
 - [Installation](#-installation)
+- [Variables d'environnement](#-variables-denvironnement)
 - [Routes API](#-routes-api)
-- [Exemples d'utilisation](#-exemples-dutilisation)
 - [Agrégations MongoDB](#-agrégations-mongodb)
-- [Gestion des fichiers JSON](#-gestion-des-fichiers-json)
-- [Équipe & Contributions](#-équipe--contributions)
-- [Technologies](#-technologies)
+- [Manipulation de fichiers JSON](#-manipulation-de-fichiers-json)
+- [Répartition des tâches](#-répartition-des-tâches-entre-étudiants)
+- [Technologies utilisées](#-technologies-utilisées)
+- [Difficultés rencontrées](#-difficultés-rencontrées)
+- [Améliorations possibles](#-améliorations-possibles)
 
 ---
 
-## 🎯 Présentation
+## Description du projet
 
-**Habit Tracker** est une application backend permettant de :
-- ✅ Gérer des utilisateurs (inscription, recherche, statistiques)
-- ✅ Créer et suivre des habitudes quotidiennes
-- ✅ Logger les complétions d'habitudes avec notes et humeur
-- ✅ Analyser les statistiques de progression (streaks, taux de complétion)
-- ✅ Importer/exporter des données JSON
-- ✅ Effectuer des agrégations MongoDB avancées
+**Habit Tracker** est une API REST permettant de gérer et suivre des habitudes quotidiennes. L'application permet aux utilisateurs de créer des habitudes, de logger leurs progrès quotidiens, et d'analyser leurs statistiques de complétion via des agrégations MongoDB avancées.
 
-**Contexte** : Projet académique démontrant la maîtrise de :
-- Node.js + Express + MongoDB
-- Opérations CRUD avancées
-- Agrégations MongoDB complexes
-- Manipulation de fichiers JSON
-- Architecture MVC propre et maintenable
+### Fonctionnalités principales
+
+✅ Gestion complète des utilisateurs (CRUD + validation)  
+✅ Création et suivi d'habitudes personnalisées  
+✅ Enregistrement quotidien des logs d'habitudes  
+✅ Statistiques avancées avec agrégations MongoDB  
+✅ Export/Import de données JSON  
+✅ Filtres et pagination sur toutes les routes de lecture  
+✅ Calcul de streaks et taux de complétion  
 
 ---
 
-## 🏗️ Architecture
+##  Architecture
 
-### Structure du projet
+Le projet suit une architecture **MVC** (Model-View-Controller) adaptée pour une API REST :
+
 ```
 habit-tracker-backend/
-├── 📂 config/
-│   ├── db.js                    # Connexion MongoDB
-│   └── constants.js             # Constantes globales
-├── 📂 controllers/
-│   ├── userController.js        # Logique utilisateurs
-│   ├── habitController.js       # Logique habitudes
-│   ├── habitLogController.js    # Logique logs
-│   └── statsController.js       # Logique statistiques
-├── 📂 data/
-│   ├── imports/                 # Fichiers JSON pour seed
+│
+├── config/
+│   ├── constants.js       # Constantes globales
+│   └── db.js             # Configuration MongoDB
+│
+├── controllers/          #  Logique métier (1 par étudiant)
+│   ├── userController.js         # ÉTUDIANT 1
+│   ├── habitController.js        # ÉTUDIANT 2
+│   ├── habitLogController.js     # ÉTUDIANT 3
+│   └── statsController.js        # ÉTUDIANT 4
+│
+├── models/               # Schémas Mongoose
+│   ├── User.js
+│   ├── Habit.js
+│   ├── Habitlog.js
+│   └── Statistics.js
+│
+├── routes/               # Définition des endpoints
+│   ├── userRoutes.js
+│   ├── Habitroutes.js
+│   ├── HabitLogRoutes.js
+│   └── statsRoutes.js
+│
+├── middlewares/          #  Middlewares personnalisés
+│   ├── auth.js
+│   ├── errorHandler.js
+│   ├── notFound.js
+│   └── validation.js
+│
+├── services/             #  Services métier
+│   └── statsService.js
+│
+├── utils/                #  Utilitaires
+│   └── exports.js        # Gestion export JSON
+│
+├── data/                 #  Fichiers JSON
+│   ├── imports/          # Fichiers d'import
 │   │   ├── initial-users.json
-│   │   └── initial-habits.json
-│   ├── exports/                 # Statistiques exportées
-│   └── user-logs.json           # Logs des actions
-├── 📂 middlewares/
-│   ├── errorHandler.js          # Gestion centralisée des erreurs
-│   ├── validation.js            # Validation avec ValidatorJS
-│   └── notFound.js              # Routes 404
-├── 📂 models/
-│   ├── User.js                  # Schéma utilisateur
-│   ├── Habit.js                 # Schéma habitude
-│   ├── Habitlog.js              # Schéma log d'habitude
-│   └── Statistics.js            # Schéma statistiques
-├── 📂 routes/
-│   ├── userRoutes.js            # Routes /api/users
-│   ├── Habitroutes.js           # Routes /api/habits
-│   ├── HabitLogRoutes.js        # Routes /api/habitlogs
-│   └── statsRoutes.js           # Routes /api/stats
-├── 📂 services/
-│   └── statsService.js          # Service d'agrégations
-├── 📂 utils/
-│   └── fileManager.js           # Utilitaires fichiers JSON
-├── 📂 public/
-│   └── index.html               # Interface de test
-├── server.js                    # Point d'entrée
-├── .env                         # Variables d'environnement
+│   │   ├── initial-habits.json
+│   │   └── initial-habitLogs.json
+│   └── exports/          # Fichiers générés
+│       ├── stats-*.json
+│       └── habitlogs-*.json
+│
+├── public/               #  Interface de test (HTML)
+│   ├── index.html
+│   └── favicon.ico
+│
+├── .env                  # Variables d'environnement
+├── .gitignore
+├── app.js                # Configuration Express
+├── server.js             # Point d'entrée
 ├── package.json
 └── README.md
 ```
-
-### Stack technique
-- **Runtime** : Node.js v18+
-- **Framework** : Express.js 4.22+
-- **Base de données** : MongoDB 7.0+ (avec Mongoose 8.x)
-- **Validation** : Validator.js
-- **Sécurité** : bcryptjs (hachage de mots de passe)
-- **Variables d'env** : dotenv
-- **Dev tools** : nodemon, morgan
 
 ---
 
 ## 📊 Modèle de données
 
-### Collection `users`
+### **User** (Utilisateur)
 ```javascript
 {
-  _id: ObjectId,
-  username: String (unique, 3-30 caractères),
-  email: String (unique, format email validé),
-  password: String (haché avec bcrypt),
+  username: String,         // Unique, 3-30 caractères
+  email: String,            // Unique, validé par ValidatorJS
+  password: String,         // Hashé avec bcrypt (min 6 caractères)
   preferences: {
-    theme: String ('light' | 'dark' | 'auto'),
+    theme: String,          // 'light' | 'dark' | 'auto'
     notifications: Boolean,
-    language: String ('fr' | 'en' | 'es')
+    language: String        // 'fr' | 'en' | 'es'
   },
   stats: {
     totalHabits: Number,
-    completedToday: Number,
     currentStreak: Number,
     longestStreak: Number
   },
-  isActive: Boolean (default: true),
-  createdAt: Date (auto),
-  updatedAt: Date (auto)
+  isActive: Boolean,
+  createdAt: Date
 }
 ```
 
-### Collection `habits`
+### **Habit** (Habitude)
 ```javascript
 {
-  _id: ObjectId,
-  user: ObjectId (ref: 'User'),
-  title: String (requis, 3-100 caractères),
+  user: ObjectId,           // Référence User
+  title: String,            // 3-100 caractères
   description: String,
-  category: String ('health' | 'work' | 'personal' | 'learning' | 'social' | 'other'),
-  frequency: String ('daily' | 'weekly' | 'monthly' | 'custom'),
-  targetDays: [String] (jours de la semaine),
-  icon: String (default: '✓'),
-  color: String (default: '#3B82F6'),
-  isActive: Boolean (default: true),
-  createdAt: Date,
-  updatedAt: Date
+  category: String,         // 'health' | 'work' | 'personal' | 'learning' | 'social' | 'other'
+  frequency: String,        // 'daily' | 'weekly' | 'monthly' | 'custom'
+  isArchived: Boolean,
+  createdAt: Date
 }
 ```
 
-### Collection `habitlogs`
+### **Habitlog** (Log quotidien)
 ```javascript
 {
-  _id: ObjectId,
-  habit: ObjectId (ref: 'Habit'),
-  user: ObjectId (ref: 'User'),
-  date: Date (default: now),
-  dateString: String (format: YYYY-MM-DD, index unique),
-  completed: Boolean (default: true),
-  notes: String (max: 300 caractères),
-  mood: String ('excellent' | 'bon' | 'moyen' | 'difficile'),
-  duration: Number (en minutes, 0-1440),
+  habit: ObjectId,          // Référence Habit
+  user: ObjectId,           // Référence User
+  date: Date,
+  dateString: String,       // 'YYYY-MM-DD' (index unique)
+  completed: Boolean,
+  notes: String,            // Max 300 caractères
+  mood: String,             // 'excellent' | 'bon' | 'moyen' | 'difficile'
+  duration: Number,         // Minutes (0-1440)
   metadata: {
     location: String,
     weather: String,
     companions: [String]
-  },
-  createdAt: Date,
-  updatedAt: Date
+  }
 }
 ```
 
-### Collection `statistics`
+### **Statistics** (Statistiques)
 ```javascript
 {
-  _id: ObjectId,
-  user: ObjectId (ref: 'User'),
-  habit: ObjectId (ref: 'Habit'),
-  period: String ('daily' | 'weekly' | 'monthly' | 'yearly'),
+  user: ObjectId,
+  habit: ObjectId,
+  period: String,           // 'daily' | 'weekly' | 'monthly' | 'yearly'
   totalCompleted: Number,
   totalAttempts: Number,
-  completionRate: Number (0-100),
+  completionRate: Number,   // 0-100%
   streak: Number,
   bestStreak: Number,
-  averageMood: String,
-  totalDuration: Number,
   startDate: Date,
-  endDate: Date,
-  createdAt: Date,
-  updatedAt: Date
+  endDate: Date
 }
 ```
 
 ---
 
-## 🚀 Installation
+## Installation
 
-### 1. Prérequis
-- Node.js v18+ installé
-- MongoDB (local ou MongoDB Atlas)
-- Git
+### Prérequis
 
-### 2. Cloner le projet
+- **Node.js** >= 18.0.0
+- **MongoDB** >= 6.0 (local ou Atlas)
+- **npm** >= 9.0.0
+
+### Étapes
+
 ```bash
+# 1. Cloner le projet
 git clone https://github.com/votre-username/habit-tracker-backend.git
 cd habit-tracker-backend
-```
 
-### 3. Installer les dépendances
-```bash
+# 2. Installer les dépendances
 npm install
-```
 
-### 4. Configuration
-Créer un fichier `.env` à la racine :
-```env
-PORT=5000
-MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/habit_tracker
-NODE_ENV=development
-```
+# 3. Créer le fichier .env (voir section suivante)
+cp .env.example .env
 
-### 5. Seed initial (optionnel)
-```bash
+# 4. Modifier .env avec vos credentials MongoDB
+
+# 5. (Optionnel) Importer les données de test
 npm run seed
+
+# 6. Démarrer le serveur
+npm start        # Production
+npm run dev      # Développement (nodemon)
 ```
 
-### 6. Lancer le serveur
-```bash
-# Mode développement (avec nodemon)
-npm run dev
+Le serveur démarre sur **http://localhost:5000**
 
-# Mode production
-npm start
+---
+
+## 🔐 Variables d'environnement
+
+Créer un fichier `.env` à la racine :
+
+```env
+# MongoDB
+MONGO_URI=mongodb://localhost:27017/habit-tracker
+# OU pour MongoDB Atlas :
+# MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/habit-tracker
+
+# Serveur
+PORT=5000
+NODE_ENV=development
+
+# JWT (si authentification)
+JWT_SECRET=votre_secret_jwt_super_securise
+JWT_EXPIRE=7d
 ```
-
-**Serveur disponible sur** : `http://localhost:5000`  
-**Interface de test** : `http://localhost:5000`
 
 ---
 
 ## 🛣️ Routes API
 
-### 👤 Routes Utilisateurs (`/api/users`)
-
-| Méthode | Endpoint | Description | Type |
-|---------|----------|-------------|------|
-| POST | `/register` | Créer un utilisateur | Écriture |
-| GET | `/search` | Recherche avancée (filtres + pagination) | Lecture avancée |
-| GET | `/:id/stats` | Statistiques utilisateur (agrégation $lookup) | Agrégation |
-| PUT | `/:id` | Modifier un utilisateur | Écriture |
-| GET | `/import` | Importer users depuis JSON | Lecture JSON |
-| GET | `/stats/global` | Stats globales tous users (agrégation) | Agrégation |
-| GET | `/stats/export` | Exporter stats en JSON | Écriture JSON |
-
-### 🎯 Routes Habitudes (`/api/habits`)
-
-| Méthode | Endpoint | Description | Type |
-|---------|----------|-------------|------|
-| POST | `/` | Créer une habitude | Écriture |
-| GET | `/search` | Recherche avancée avec filtres | Lecture avancée |
-| GET | `/stats/categories` | Stats par catégorie (agrégation $group) | Agrégation |
-| GET | `/stats/popular` | Habitudes populaires (agrégation $lookup) | Agrégation |
-| GET | `/:id` | Obtenir une habitude | Lecture |
-| PUT | `/:id` | Modifier une habitude | Écriture |
-| DELETE | `/:id` | Supprimer une habitude | Suppression |
-
-### 📝 Routes Logs (`/api/habitlogs`)
-
-| Méthode | Endpoint | Description | Type |
-|---------|----------|-------------|------|
-| POST | `/` | Créer un log | Écriture |
-| GET | `/history` | Historique avec filtres (dates, user, habit) | Lecture avancée |
-| GET | `/streaks` | Calcul des streaks (agrégation complexe) | Agrégation |
-| POST | `/import` | Importer logs depuis JSON | Lecture JSON |
-| GET | `/export` | Exporter logs en JSON | Écriture JSON |
-
-### 📊 Routes Statistiques (`/api/stats`)
-
-| Méthode | Endpoint | Description | Type |
-|---------|----------|-------------|------|
-| POST | `/export` | Exporter stats utilisateur | Écriture JSON |
-| GET | `/dashboard` | Dashboard complet utilisateur | Lecture avancée |
-| GET | `/aggregation` | Users + Habits (agrégation $lookup) | Agrégation |
-| GET | `/top-habits` | Top habitudes globales | Agrégation |
-| GET | `/overview` | Vue d'ensemble globale | Lecture |
-| GET | `/categories` | Stats par catégorie | Agrégation |
+### Base URL
+```
+http://localhost:5000/api
+```
 
 ---
 
-## 💡 Exemples d'utilisation
+### 👤 **UTILISATEURS** (`/api/users`)
 
-### 1. Créer un utilisateur
+| Méthode | Endpoint | Description | Étudiant |
+|---------|----------|-------------|----------|
+| `POST` | `/register` | Créer un utilisateur | 1 |
+| `GET` | `/search` | Recherche avancée (pagination) | 1 |
+| `GET` | `/:id/stats` | Stats utilisateur (agrégation) | 1 |
+| `PUT` | `/:id` | Modifier un utilisateur | 1 |
+| `GET` | `/import` | Import depuis JSON | 1 |
+| `GET` | `/stats/global` | Stats globales | 1 |
+| `GET` | `/stats/export` | Export stats JSON | 1 |
+
+#### Exemple : Créer un utilisateur
 ```bash
 POST /api/users/register
 Content-Type: application/json
 
 {
-  "username": "alice_martin",
-  "email": "alice@example.com",
-  "password": "secret123"
-}
-```
-
-**Réponse** :
-```json
-{
-  "success": true,
-  "message": "Utilisateur créé avec succès",
-  "data": {
-    "id": "674a5b2c3f1a2b3c4d5e6f7a",
-    "username": "alice_martin",
-    "email": "alice@example.com",
-    "preferences": {
-      "theme": "light",
-      "notifications": true,
-      "language": "fr"
-    },
-    "createdAt": "2024-12-07T10:30:00.000Z"
+  "username": "john_doe",
+  "email": "john@example.com",
+  "password": "motdepasse123",
+  "preferences": {
+    "theme": "dark",
+    "notifications": true,
+    "language": "fr"
   }
 }
 ```
 
-### 2. Rechercher des utilisateurs
+#### Exemple : Recherche avec filtres
 ```bash
-GET /api/users/search?search=alice&limit=10&page=1
+GET /api/users/search?search=john&isActive=true&page=1&limit=10&sortBy=createdAt&order=desc
 ```
 
-**Réponse** :
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "_id": "674a5b2c3f1a2b3c4d5e6f7a",
-      "username": "alice_martin",
-      "email": "alice@example.com",
-      "isActive": true
-    }
-  ],
-  "pagination": {
-    "currentPage": 1,
-    "totalPages": 1,
-    "totalUsers": 1,
-    "limit": 10
-  }
-}
-```
+---
 
-### 3. Créer une habitude
+###  **HABITUDES** (`/api/habits`)
+
+| Méthode | Endpoint | Description | Étudiant |
+|---------|----------|-------------|----------|
+| `POST` | `/` | Créer une habitude | 2 |
+| `GET` | `/search` | Recherche avancée (filtres) | 2 |
+| `GET` | `/stats/categories` | Stats par catégorie (agrégation) | 2 |
+| `GET` | `/stats/popular` | Habitudes populaires (agrégation) | 2 |
+| `GET` | `/:id` | Obtenir une habitude | 2 |
+| `PUT` | `/:id` | Modifier une habitude | 2 |
+| `DELETE` | `/:id` | Supprimer une habitude | 2 |
+
+#### Exemple : Créer une habitude
 ```bash
 POST /api/habits
 Content-Type: application/json
 
 {
-  "user": "674a5b2c3f1a2b3c4d5e6f7a",
+  "user": "6932c49e7ae4d0f61566030b",
   "title": "Faire du sport",
-  "description": "30 minutes de cardio",
+  "description": "30 minutes de course à pied",
   "category": "health",
-  "frequency": "daily",
-  "icon": "🏃",
-  "color": "#10B981"
+  "frequency": "daily"
 }
 ```
 
-### 4. Logger une complétion
+#### Exemple : Stats par catégorie
+```bash
+GET /api/habits/stats/categories
+
+# Retourne :
+{
+  "success": true,
+  "data": [
+    {
+      "category": "health",
+      "totalHabits": 12,
+      "uniqueUsers": 5,
+      "activityDays": 45
+    },
+    ...
+  ]
+}
+```
+
+---
+
+###  **LOGS D'HABITUDES** (`/api/habitlogs`)
+
+| Méthode | Endpoint | Description | Étudiant |
+|---------|----------|-------------|----------|
+| `POST` | `/` | Créer un log | 3 |
+| `GET` | `/history` | Historique avec filtres (pagination) | 3 |
+| `GET` | `/streaks` | Calcul des streaks (agrégation) | 3 |
+| `POST` | `/import` | Import logs depuis JSON | 3 |
+| `GET` | `/export` | Export logs en JSON | 3 |
+
+#### Exemple : Créer un log
 ```bash
 POST /api/habitlogs
 Content-Type: application/json
 
 {
-  "habit": "674b6c3d4e2a3b4c5d6e7f8b",
-  "user": "674a5b2c3f1a2b3c4d5e6f7a",
+  "habit": "6932d1234abcd0f61566030c",
+  "user": "6932c49e7ae4d0f61566030b",
+  "date": "2025-12-08",
   "completed": true,
   "notes": "Excellente séance !",
   "mood": "excellent",
@@ -372,279 +354,287 @@ Content-Type: application/json
 }
 ```
 
-### 5. Statistiques utilisateur (avec agrégation)
+#### Exemple : Historique avec filtres
 ```bash
-GET /api/users/674a5b2c3f1a2b3c4d5e6f7a/stats
+GET /api/habitlogs/history?user=6932c49e7ae4d0f61566030b&completed=true&startDate=2025-12-01&endDate=2025-12-08&page=1&limit=20
 ```
 
-**Réponse** :
-```json
+---
+
+###  **STATISTIQUES** (`/api/stats`)
+
+| Méthode | Endpoint | Description | Étudiant |
+|---------|----------|-------------|----------|
+| `POST` | `/export` | Exporter stats utilisateur (JSON) | 4 |
+| `GET` | `/dashboard` | Dashboard utilisateur | 4 |
+| `GET` | `/aggregation` | Users → Habits (agrégation) | 4 |
+| `GET` | `/top-habits` | Top habitudes | 4 |
+| `GET` | `/overview` | Vue d'ensemble globale | 4 |
+| `GET` | `/categories` | Stats par catégorie | 4 |
+
+#### Exemple : Dashboard utilisateur
+```bash
+GET /api/stats/dashboard?userId=6932c49e7ae4d0f61566030b&period=monthly
+
+# Retourne :
 {
   "success": true,
   "data": {
-    "username": "alice_martin",
-    "email": "alice@example.com",
-    "totalHabits": 5,
-    "activeHabits": 3,
-    "habitsByCategory": {
-      "health": 2,
-      "work": 3
+    "user": { ... },
+    "summary": {
+      "totalHabits": 8,
+      "completionRate": 78.5,
+      "currentStreak": 12
     },
-    "totalLogs": 42,
-    "completedLogs": 38,
-    "completionRate": 90.48,
-    "memberSince": 45
+    "period": { ... },
+    "trends": [ ... ]
   }
 }
 ```
 
 ---
 
-## 🔍 Agrégations MongoDB
+## Agrégations MongoDB
 
-### Exemple 1 : Statistiques utilisateur avec $lookup
+Chaque étudiant a implémenté **au moins une agrégation MongoDB** avec pipeline :
+
+### **Étudiant 1** - Stats utilisateur avec $lookup
 ```javascript
-// userController.js - getStats()
+// GET /api/users/:id/stats
 User.aggregate([
-  { $match: { _id: new mongoose.Types.ObjectId(userId) } },
-  
-  // Jointure avec Habits
-  {
-    $lookup: {
-      from: 'habits',
-      localField: '_id',
-      foreignField: 'user',
-      as: 'userHabits'
-    }
-  },
-  
-  // Jointure avec Habitlogs
-  {
-    $lookup: {
-      from: 'habitlogs',
-      localField: '_id',
-      foreignField: 'user',
-      as: 'userLogs'
-    }
-  },
-  
-  // Calculs avancés
-  {
-    $project: {
-      username: 1,
-      totalHabits: { $size: '$userHabits' },
-      completionRate: {
-        $multiply: [
-          { $divide: ['$completedLogs', '$totalLogs'] },
-          100
-        ]
-      }
-    }
-  }
+  { $match: { _id: userId } },
+  { $lookup: { from: 'habits', localField: '_id', foreignField: 'user', as: 'userHabits' } },
+  { $lookup: { from: 'habitlogs', localField: '_id', foreignField: 'user', as: 'userLogs' } },
+  { $project: { totalHabits: { $size: '$userHabits' }, completionRate: ... } }
 ])
 ```
 
-### Exemple 2 : Streaks par utilisateur
+### **Étudiant 2** - Stats par catégorie
 ```javascript
-// habitLogController.js - getStreaks()
-Habitlog.aggregate([
-  { $sort: { user: 1, date: -1 } },
-  
-  {
-    $group: {
-      _id: '$user',
-      logs: { $push: { date: '$date', completed: '$completed' } },
-      totalLogs: { $sum: 1 },
-      completedLogs: { $sum: { $cond: ['$completed', 1, 0] } }
-    }
-  },
-  
-  // Lookup pour récupérer les infos user
-  {
-    $lookup: {
-      from: 'users',
-      localField: '_id',
-      foreignField: '_id',
-      as: 'userInfo'
-    }
-  },
-  
-  {
-    $project: {
-      username: '$userInfo.username',
-      completionRate: {
-        $round: [
-          { $multiply: [{ $divide: ['$completedLogs', '$totalLogs'] }, 100] },
-          2
-        ]
-      }
-    }
-  }
-])
-```
-
-### Exemple 3 : Stats par catégorie
-```javascript
-// habitController.js - getStatsByCategory()
+// GET /api/habits/stats/categories
 Habit.aggregate([
   { $match: { isActive: { $ne: false } } },
-  
-  {
-    $group: {
-      _id: '$category',
-      totalHabits: { $sum: 1 },
-      uniqueUsers: { $addToSet: '$user' },
-      firstCreatedAt: { $min: '$createdAt' },
-      lastCreatedAt: { $max: '$createdAt' }
-    }
-  },
-  
-  {
-    $project: {
-      category: '$_id',
-      totalHabits: 1,
-      uniqueUsers: { $size: '$uniqueUsers' },
-      activityDays: {
-        $dateDiff: {
-          startDate: '$firstCreatedAt',
-          endDate: '$lastCreatedAt',
-          unit: 'day'
-        }
-      }
-    }
-  },
-  
+  { $group: { _id: '$category', totalHabits: { $sum: 1 }, uniqueUsers: { $addToSet: '$user' } } },
+  { $project: { category: '$_id', uniqueUsers: { $size: '$uniqueUsers' } } },
   { $sort: { totalHabits: -1 } }
 ])
 ```
 
----
-
-## 📂 Gestion des fichiers JSON
-
-### Lecture de fichiers JSON
-**Fichiers lus** :
-- `data/imports/initial-users.json` - Import utilisateurs
-- `data/imports/initial-habits.json` - Import habitudes
-- `data/imports/initial-logs.json` - Import logs
-
-**Exemple de lecture** :
+### **Étudiant 3** - Calcul des streaks
 ```javascript
-// userController.js - importFromJson()
-const dataPath = path.join(process.cwd(), 'data/imports/initial-users.json');
-const jsonData = fs.readFileSync(dataPath, 'utf-8');
-const usersData = JSON.parse(jsonData);
+// GET /api/habitlogs/streaks
+Habitlog.aggregate([
+  { $sort: { user: 1, date: -1 } },
+  { $group: { _id: '$user', logs: { $push: { date: '$date', completed: '$completed' } } } },
+  { $lookup: { from: 'users', localField: '_id', foreignField: '_id', as: 'userInfo' } },
+  { $project: { completionRate: ..., currentStreak: ... } }
+])
 ```
 
-### Écriture de fichiers JSON
-**Fichiers générés** :
-- `data/user-logs.json` - Logs des actions utilisateurs
-- `data/exports/user-stats-[timestamp].json` - Export stats users
-- `data/exports/stats-user-[userId]-[timestamp].json` - Export stats détaillées
-- `data/exports/habitlogs-export-[timestamp].json` - Export logs habitudes
-
-**Exemple d'écriture** :
+### **Étudiant 4** - Agrégation Users → Habits
 ```javascript
-// userController.js - exportStats()
-const exportData = { exportDate: new Date().toISOString(), statistics: stats };
-const filename = `user-stats-${timestamp}.json`;
-const exportPath = path.join(process.cwd(), 'data/exports', filename);
-fs.writeFileSync(exportPath, JSON.stringify(exportData, null, 2));
+// GET /api/stats/aggregation
+User.aggregate([
+  { $lookup: { from: 'habits', localField: '_id', foreignField: 'user', as: 'habits' } },
+  { $lookup: { from: 'habitlogs', localField: '_id', foreignField: 'user', as: 'logs' } },
+  { $project: { username: 1, totalHabits: { $size: '$habits' }, completionRate: ... } }
+])
 ```
 
 ---
 
-## 👥 Équipe & Contributions
+##  Manipulation de fichiers JSON
 
-### Répartition des tâches (6 étudiants)
+### **Lecture de fichiers JSON**
 
-**Étudiant 1** - Gestion Utilisateurs
-- Modèle User
-- 7 routes (register, search, getStats, update, import, globalStats, export)
-- Agrégation avec $lookup (Habits + Habitlogs)
-- Export JSON
+#### Étudiant 1 - Import utilisateurs
+```javascript
+// GET /api/users/import
+const jsonData = fs.readFileSync('data/imports/initial-users.json', 'utf-8');
+const users = JSON.parse(jsonData);
+await User.insertMany(users);
+```
 
-**Étudiant 2** - Gestion Habitudes
-- Modèle Habit
-- 7 routes (create, search, statsCategories, popular, getById, update, delete)
-- Agrégation $group + $lookup
-- Stats par catégorie
+#### Étudiant 3 - Import logs
+```javascript
+// POST /api/habitlogs/import
+const jsonData = fs.readFileSync('data/imports/initial-habitLogs.json', 'utf-8');
+const logs = JSON.parse(jsonData);
+await Habitlog.insertMany(logs);
+```
 
-**Étudiant 3** - Gestion Logs
-- Modèle Habitlog
-- 5 routes (create, history, streaks, import, export)
-- Agrégation complexe pour streaks
-- Import/Export JSON
+### **Écriture de fichiers JSON**
 
-**Étudiant 4** - Statistiques Centralisées
-- Modèle Statistics + Service
-- 6 routes (export, dashboard, aggregation, topHabits, overview, categories)
-- Agrégations multi-collections
-- Export JSON
+#### Étudiant 1 - Export stats utilisateurs
+```javascript
+// GET /api/users/stats/export
+const stats = await User.aggregate([...]);
+const exportPath = path.join('data', 'exports', `user-stats-${timestamp}.json`);
+fs.writeFileSync(exportPath, JSON.stringify(stats, null, 2));
+```
 
-**Étudiant 5** - Infrastructure
-- Configuration MongoDB
-- Middlewares (errorHandler, validation, notFound)
-- Utilitaires (fileManager)
-- Point d'entrée (server.js)
+#### Étudiant 3 - Export logs
+```javascript
+// GET /api/habitlogs/export
+const logs = await Habitlog.find(query).populate('habit user').lean();
+const exportPath = path.join('data', 'exports', `habitlogs-${timestamp}.json`);
+fs.writeFileSync(exportPath, JSON.stringify({ logs }, null, 2));
+```
 
-**Étudiant 6** - Documentation & Seeding
-- Script de seeding
-- Fichiers JSON initiaux
-- README complet
-- Interface de test HTML
-
----
-
-## 🛠️ Technologies
-
-### Backend
-- **Node.js** 18+ - Runtime JavaScript
-- **Express.js** 4.22+ - Framework web
-- **Mongoose** 8.20+ - ODM MongoDB
-
-### Base de données
-- **MongoDB** 7.0+ - Base NoSQL
-
-### Validation & Sécurité
-- **Validator.js** 13+ - Validation des données
-- **bcryptjs** 2.4+ - Hachage de mots de passe
-- **dotenv** 16+ - Variables d'environnement
-
-### Développement
-- **Nodemon** 3+ - Auto-reload
-- **Morgan** 1.10+ - Logs HTTP
-- **CORS** 2.8+ - Cross-Origin Resource Sharing
+#### Étudiant 4 - Export statistiques
+```javascript
+// POST /api/stats/export
+const statsData = await StatsService.getUserStats(userId);
+const exportPath = path.join('data', 'exports', `stats-user-${userId}.json`);
+fs.writeFileSync(exportPath, JSON.stringify(statsData, null, 2));
+```
 
 ---
 
-## 📈 Améliorations futures
+##  Répartition des tâches entre étudiants
 
-- [ ] **Authentification JWT** - Sécuriser les routes
-- [ ] **Rate limiting** - Limiter les requêtes par IP
-- [ ] **Tests unitaires** - Jest + Supertest
-- [ ] **Documentation Swagger** - API interactive
-- [ ] **Notifications push** - Rappels d'habitudes
-- [ ] **Webhooks** - Intégrations tierces
-- [ ] **Cache Redis** - Optimiser les performances
-- [ ] **Déploiement** - Heroku / Render / Railway
+| Étudiant | Module | Routes | Agrégation | Fichiers JSON |
+|----------|--------|--------|-----------|---------------|
+| **1** | Users | 7 routes | Stats user ($lookup) | Import + Export |
+| **2** | Habits | 7 routes | Stats catégories ($group) | - |
+| **3** | Logs | 5 routes | Streaks ($group + $lookup) | Import + Export |
+| **4** | Stats | 6 routes | Users → Habits ($lookup) | Export |
+| **5** | Analytics | 4 routes | Trends ($facet) | - |
+| **6** | Config/Setup | DB + Seed | - | Fichiers initiaux |
+
+### **Étudiant 1** - Gestion des utilisateurs
+✅ Route d'écriture : `POST /api/users/register`  
+✅ Route de lecture avancée : `GET /api/users/search` (pagination + filtres)  
+✅ Route d'agrégation : `GET /api/users/:id/stats` (pipeline avec $lookup)  
+📖 Lecture JSON : `GET /api/users/import`  
+📝 Écriture JSON : `GET /api/users/stats/export`
+
+### **Étudiant 2** - Gestion des habitudes
+✅ Route d'écriture : `POST /api/habits`  
+✅ Route de lecture avancée : `GET /api/habits/search` (filtres + pagination)  
+✅ Route d'agrégation : `GET /api/habits/stats/categories` (pipeline avec $group)
+
+### **Étudiant 3** - Gestion des logs
+✅ Route d'écriture : `POST /api/habitlogs`  
+✅ Route de lecture avancée : `GET /api/habitlogs/history` (filtres + pagination)  
+✅ Route d'agrégation : `GET /api/habitlogs/streaks` (pipeline avec $group + $lookup)  
+📖 Lecture JSON : `POST /api/habitlogs/import`  
+📝 Écriture JSON : `GET /api/habitlogs/export`
+
+### **Étudiant 4** - Statistiques centralisées
+✅ Route d'écriture : `POST /api/stats/export`  
+✅ Route de lecture avancée : `GET /api/stats/dashboard`  
+✅ Route d'agrégation : `GET /api/stats/aggregation` (pipeline avec $lookup)  
+📝 Écriture JSON : `POST /api/stats/export`
+
+### **Étudiant 5** - Analytics avancées
+✅ Route d'agrégation : `GET /api/analytics/users/:userId` (agrégation complexe)  
+✅ Route de lecture : `GET /api/analytics/trends/:userId` (filtres avancés)  
+✅ Route d'analyse : `GET /api/analytics/habits/:habitId`
+
+### **Étudiant 6** - Configuration & Setup
+✅ Configuration MongoDB (`config/db.js`)  
+✅ Seed initial (`data/seed.js`)  
+✅ Middlewares (`errorHandler.js`, `notFound.js`)  
+✅ Services (`statsService.js`)
 
 ---
 
-## 📄 Licence
+## Technologies utilisées
 
-Projet académique - Skills4Mind - M.TAALBI RABAH  
-ISC License
+| Technologie | Version | Usage |
+|------------|---------|-------|
+| **Node.js** | 18+ | Runtime JavaScript |
+| **Express** | 4.22 | Framework web |
+| **MongoDB** | 6.0+ | Base de données NoSQL |
+| **Mongoose** | 8.20 | ODM MongoDB |
+| **bcryptjs** | 2.4 | Hashage des mots de passe |
+| **ValidatorJS** | 13.11 | Validation des données |
+| **dotenv** | 16.6 | Variables d'environnement |
+| **cors** | 2.8 | Gestion CORS |
+| **nodemon** | 3.1 | Auto-reload en dev |
 
 ---
 
-## 🤝 Support
+##  Difficultés rencontrées
 
-Pour toute question :
-- 📧 Email : [votre-email@example.com]
-- 🐛 Issues : [GitHub Issues](https://github.com/votre-username/habit-tracker-backend/issues)
-- 📖 Documentation : [Ce README]
+### 1. **Gestion des imports ES Modules**
+- **Problème** : Erreurs avec `import/export` au lieu de `require()`
+- **Solution** : Ajout de `"type": "module"` dans `package.json`
+
+### 2. **Agrégations MongoDB complexes**
+- **Problème** : Pipeline $lookup avec plusieurs jointures
+- **Solution** : Décomposition en étapes simples avec $project
+
+### 3. **Validation des données**
+- **Problème** : ValidatorJS non utilisé initialement
+- **Solution** : Ajout de `validator.isEmail()`, `validator.isLength()`, etc.
+
+### 4. **Gestion des dates pour les logs**
+- **Problème** : Doublons de logs pour le même jour
+- **Solution** : Ajout de `dateString` (YYYY-MM-DD) avec index unique
+
+### 5. **Export/Import JSON**
+- **Problème** : Chemins de fichiers incorrects en ES Modules
+- **Solution** : Utilisation de `path.join(process.cwd(), 'data', ...)`
+
+### 6. **Middleware d'erreurs**
+- **Problème** : Erreurs non catchées
+- **Solution** : Middleware `errorHandler.js` global
 
 ---
 
-**⭐ Si ce projet vous a aidé, n'hésitez pas à mettre une étoile sur GitHub !**
+## 🎨 Améliorations possibles
+
+### Court terme
+- ✅ Authentification JWT complète
+- ✅ Refresh tokens
+- ✅ Rate limiting (express-rate-limit)
+- ✅ Upload d'images pour les habitudes
+- ✅ Notifications push
+- ✅ Tests unitaires (Jest)
+
+### Moyen terme
+- ✅ GraphQL API
+- ✅ WebSockets pour notifications temps réel
+- ✅ Cache avec Redis
+- ✅ Docker & Docker Compose
+- ✅ CI/CD (GitHub Actions)
+
+### Long terme
+- ✅ Frontend React/Vue.js
+- ✅ Application mobile (React Native)
+- ✅ Gamification (badges, récompenses)
+- ✅ Partage social entre utilisateurs
+- ✅ Analyse IA des habitudes
+
+---
+
+## 📝 Licence
+
+Ce projet est sous licence **ISC**.
+
+---
+
+## 👨‍💻 Auteurs
+
+**Skills4Mind - M.TAALBI RABAH**
+
+**Équipe Projet** :
+- Étudiant 1 : [Florient-Gael Kalumuna] - Gestion utilisateurs
+- Étudiant 2 : [Ines Kheffache] - Gestion habitudes
+- Étudiant 3 : [Felix Touratier] - Gestion logs
+- Étudiant 4 : [Jad Izargui] - Statistiques
+- Étudiant 5 : [Antoine Gobron] - Analytics
+- Étudiant 6 : [Aya Hadj Sadok] - Configuration
+
+---
+
+## 📞 Contact
+
+Pour toute question ou suggestion :
+- 📧 Email : [florientg1508@gmail.com]
+- 🔗 GitHub : [https://github.com/flog1508/NodeJs_Project/settings/access?guidance_task=]
+
+---
+

@@ -527,7 +527,8 @@
           category: document.getElementById('habit_filter_category').value,
           search: document.getElementById('habit_filter_search').value
         });
-        const res = await fetch(`${API}/habits/filters?${params}`);
+        // ✅ CORRIGÉ : /search au lieu de /filters
+        const res = await fetch(`${API}/habits/search?${params}`);
         show('result_searchHabits', await res.json());
       } catch (e) {
         show('result_searchHabits', { error: e.message });
@@ -536,7 +537,8 @@
 
     async function getHabitStatsByCategory() {
       try {
-        const res = await fetch(`${API}/habits/analytics/categories`);
+        // ✅ CORRIGÉ : /stats/categories au lieu de /analytics/categories
+        const res = await fetch(`${API}/habits/stats/categories`);
         show('result_getHabitStatsByCategory', await res.json());
       } catch (e) {
         show('result_getHabitStatsByCategory', { error: e.message });

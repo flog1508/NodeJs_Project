@@ -210,31 +210,37 @@ class HabitLogController {
    */
   static async importFromJson(req, res) {
     try {
-      const dataPath = path.join(process.cwd(), 'data', 'imports', 'initial-logs.json');
+      const dataPath = path.join(process.cwd(), 'data', 'imports', 'initial-habitLogs.json');
 
       if (!fs.existsSync(dataPath)) {
         return res.status(404).json({
           success: false,
-          error: 'Fichier initial-logs.json non trouvé'
+          error: 'Fichier initial-habitLogs.json non trouvé'
         });
       }
 
       // 📖 LECTURE FICHIER JSON
       const jsonData = fs.readFileSync(dataPath, 'utf-8');
-      const logsData = JSON.parse(jsonData);
-
-      const imported = await Habitlog.insertMany(logsData);
-
-      res.json({
-        success: true,
-        message: `${imported.length} logs importés avec succès`,
-        imported: imported.length
-      });
-
-    } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  }
+       const logsData = JSON.parse(jsonData);
+   
+       // ✅ Générer dateString pour chaque log
+       const logsWithDateString = logsData.map(log => ({
+         ...log,
+         dateString: new Date(log.date).toISOString().split('T')[0]
+       }));
+   
+       const imported = await Habitlog.insertMany(logsWithDateString);
+   
+       res.json({
+         success: true,
+         message: `${imported.length} logs importés avec succès`,
+         imported: imported.length
+       });
+   
+     } catch (error) {
+       res.status(500).json({ success: false, error: error.message });
+     }
+   }
 
   /**
    * ROUTE 5 (GET) - Export logs en JSON
@@ -286,6 +292,8 @@ class HabitLogController {
 
     } catch (error) {
       res.status(500).json({ success: false, error: error.message });
+
+
     }
   }
 }
