@@ -52,5 +52,11 @@
     "userId": "6936e3d786c9826be60d41bf",
     "username": "leo",
     "timestamp": "2025-12-08T14:42:32.019Z"
+  },
+  {
+    "action": "USER_CREATED",
+    "userId": "693718168adc1f0b7d7f9b85",
+    "username": "JPGG",
+    "timestamp": "2025-12-08T18:25:26.635Z"
   }
 ]

@@ -1,54 +1,76 @@
 // server.js
 import express from 'express';
+import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import morgan from 'morgan';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import connectDB from './config/db.js';
 
-// IMPORTS ROUTES (Respecte la casse de tes fichiers)
-import habitRoutes from './routes/Habitroutes.js';
+// Import des routes
 import userRoutes from './routes/userRoutes.js';
-import statsRoutes from './routes/statsRoutes.js'; 
+import habitRoutes from './routes/habitroutes.js';
+import statsRoutes from './routes/statsRoutes.js';
+import analyticsRoutes from './routes/analyticsRoutes.js';
+import habitLogRoutes from './routes/HabitLogRoutes.js';
 
-import notFound from './middlewares/notFound.js';
+// Import des middlewares
 import errorHandler from './middlewares/errorHandler.js';
+import notFound from './middlewares/notFound.js';
 
 dotenv.config();
-connectDB();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const ENV = process.env.NODE_ENV || 'development';
 
+// 🔹 Pour ES Modules (nécessaire pour __dirname)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// MIDDLEWARES
+// Middlewares globaux
 app.use(cors());
-app.use(express.json()); // Indispensable pour POST
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(morgan('dev'));
 
-// SERVIR LES FICHIERS DU FRONTEND (Dossier public)
+// 🔹 SERVIR LES FICHIERS STATIQUES (HTML, CSS, JS)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ROUTES API
+// Connexion MongoDB
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log('✅ MongoDB connecté avec succès');
+  } catch (error) {
+    console.error('❌ Erreur de connexion MongoDB:', error.message);
+    process.exit(1);
+  }
+};
+
+// Routes API
 app.use('/api/users', userRoutes);
 app.use('/api/habits', habitRoutes);
-app.use('/api/stats', statsRoutes); // C'est ici que tes boutons se connectent
+app.use('/api/stats', statsRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/habitlogs', habitLogRoutes);
 
-// --- MODIFICATION IMPORTANTE ICI ---
-// Au lieu de renvoyer du JSON, on renvoie ton fichier HTML pour que tu puisses cliquer sur les boutons
+// Route de test API
+app.get('/api', (req, res) => {
+  res.json({ message: 'API Habit Tracker fonctionne !' });
+});
+
+// 🔹 ROUTE POUR SERVIR L'INTERFACE (optionnel, car express.static le fait déjà)
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// GESTION ERREURS
+// Middlewares d'erreur (à la fin)
 app.use(notFound);
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`✅ Serveur lancé sur http://localhost:${PORT}`);
+// Démarrage du serveur
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`);
+    console.log(`📄 Interface de test : http://localhost:${PORT}`);
+    console.log(`🔌 API disponible sur : http://localhost:${PORT}/api`);
+  });
 });

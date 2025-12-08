@@ -1,7 +1,7 @@
 {
   "name": "habit-tracker-backend",
   "version": "1.0.0",
-  "description": "API de suivi d'habitudes avec Node.js, Express et MongoDB",
+  "description": "API REST de suivi d'habitudes quotidiennes - Projet Backend Node.js & MongoDB (Skills4Mind)",
   "type": "module",
   "main": "server.js",
   "scripts": {
@@ -14,11 +14,23 @@
     "nodejs",
     "express",
     "mongodb",
+    "mongoose",
     "habit-tracker",
-    "api"
+    "rest-api",
+    "crud",
+    "aggregation",
+    "backend"
   ],
-  "author": "Votre équipe",
+  "author": "Skills4Mind - M.TAALBI RABAH - Équipe [Noms des étudiants]",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/votre-username/habit-tracker-backend.git"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
