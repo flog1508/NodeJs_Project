@@ -16,5 +16,41 @@
     "userId": "6932f98a66c4e62f62e60a56",
     "username": "ines24",
     "timestamp": "2025-12-05T15:26:07.575Z"
+  },
+  {
+    "action": "USER_CREATED",
+    "userId": "6936c4e2f1ca58a1cdc403cb",
+    "username": "TestUse",
+    "timestamp": "2025-12-08T12:30:26.841Z"
+  },
+  {
+    "action": "USER_CREATED",
+    "userId": "6936c743f1ca58a1cdc403d1",
+    "username": "JadTest",
+    "timestamp": "2025-12-08T12:40:35.700Z"
+  },
+  {
+    "action": "USER_CREATED",
+    "userId": "6936c9e3f1ca58a1cdc403ee",
+    "username": "izargui",
+    "timestamp": "2025-12-08T12:51:47.649Z"
+  },
+  {
+    "action": "USER_CREATED",
+    "userId": "6936d36bf1ca58a1cdc40410",
+    "username": "kkk",
+    "timestamp": "2025-12-08T13:32:27.429Z"
+  },
+  {
+    "action": "USER_CREATED",
+    "userId": "6936de9df1ca58a1cdc40431",
+    "username": "coucou",
+    "timestamp": "2025-12-08T14:20:13.930Z"
+  },
+  {
+    "action": "USER_CREATED",
+    "userId": "6936e3d786c9826be60d41bf",
+    "username": "leo",
+    "timestamp": "2025-12-08T14:42:32.019Z"
   }
 ]

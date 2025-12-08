@@ -187,6 +187,46 @@
     <div id="habitStatsResult" class="result"></div>
   </div>
 
+  <!-- ======================================== -->
+  <!-- 🔹 PARTIE ÉTUDIANT 4 : STATISTICS -->
+  <!-- ======================================== -->
+
+  <div class="section">
+    <h2>1️⃣1️⃣ Exporter les statistiques (POST)</h2>
+    <div class="input-row">
+      <input type="text" id="exportUserId" placeholder="User ID">
+      <input type="text" id="exportPeriod" placeholder="Période (monthly, weekly, yearly)" value="monthly">
+      <button onclick="exportStatistics()">📤 Exporter Stats</button>
+    </div>
+    <div id="exportStatsResult" class="result"></div>
+  </div>
+
+  <div class="section">
+    <h2>1️⃣2️⃣ Dashboard Statistiques (GET)</h2>
+    <div class="input-row">
+      <input type="text" id="dashboardUserId" placeholder="User ID">
+      <input type="text" id="dashboardPeriod" placeholder="Période (monthly, weekly, yearly)" value="monthly">
+      <button onclick="getDashboard()">📊 Charger Dashboard</button>
+    </div>
+    <div id="dashboardResult" class="result"></div>
+  </div>
+
+  <div class="section">
+    <h2>1️⃣3️⃣ Agrégation Users → Habits (GET)</h2>
+    <div class="input-row">
+      <button onclick="getAggregation()">🔗 Agrégation $lookup</button>
+    </div>
+    <div id="aggregationResult" class="result"></div>
+  </div>
+
+  <div class="section">
+    <h2>1️⃣4️⃣ Top 5 Habitudes (GET)</h2>
+    <div class="input-row">
+      <button onclick="getTopHabits()">🏆 Top 5 Habitudes</button>
+    </div>
+    <div id="topHabitsResult" class="result"></div>
+  </div>
+
   <!-- JAVASCRIPT API CALLS -->
   <script>
     const API_URL = "http://localhost:5000/api";
@@ -340,6 +380,74 @@
         document.getElementById("habitStatsResult").textContent = JSON.stringify(data, null, 2);
       } catch (error) {
         document.getElementById("habitStatsResult").textContent = "Erreur: " + error.message;
+      }
+    }
+
+    /* ==========================
+       ÉTUDIANT 4 : STATISTICS
+    ========================== */
+
+    // ROUTE 1 : POST /api/stats/export
+    async function exportStatistics() {
+      const userId = document.getElementById("exportUserId").value;
+      const period = document.getElementById("exportPeriod").value;
+
+      if (!userId) {
+        alert("Veuillez entrer un ID utilisateur");
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/stats/export`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId, period })
+        });
+        const data = await response.json();
+        document.getElementById("exportStatsResult").textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        document.getElementById("exportStatsResult").textContent = "Erreur: " + error.message;
+      }
+    }
+
+    // ROUTE 2 : GET /api/stats/dashboard
+    async function getDashboard() {
+      const userId = document.getElementById("dashboardUserId").value;
+      const period = document.getElementById("dashboardPeriod").value;
+
+      if (!userId) {
+        alert("Veuillez entrer un ID utilisateur");
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/stats/dashboard?userId=${userId}&period=${period}`);
+        const data = await response.json();
+        document.getElementById("dashboardResult").textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        document.getElementById("dashboardResult").textContent = "Erreur: " + error.message;
+      }
+    }
+
+    // ROUTE 3 : GET /api/stats/aggregation
+    async function getAggregation() {
+      try {
+        const response = await fetch(`${API_URL}/stats/aggregation`);
+        const data = await response.json();
+        document.getElementById("aggregationResult").textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        document.getElementById("aggregationResult").textContent = "Erreur: " + error.message;
+      }
+    }
+
+    // ROUTE 4 : GET /api/stats/top-habits
+    async function getTopHabits() {
+      try {
+        const response = await fetch(`${API_URL}/stats/top-habits`);
+        const data = await response.json();
+        document.getElementById("topHabitsResult").textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        document.getElementById("topHabitsResult").textContent = "Erreur: " + error.message;
       }
     }
   </script>

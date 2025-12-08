@@ -1,3 +1,4 @@
+// models/User.js
 import mongoose from 'mongoose';
 import validator from 'validator';
 
@@ -80,16 +81,7 @@ const userSchema = new mongoose.Schema({
   toObject: { virtuals: true }
 });
 
-// NOTE: Avoid duplicate index definitions.
-// We already declare `unique: true` on `email` and `username` above which
-// creates the corresponding indexes. Defining the same indexes again with
-// `userSchema.index(...)` causes Mongoose to emit duplicate-index warnings.
-// Therefore we remove the explicit `schema.index(...)` calls and rely on the
-// `unique: true` declarations to create the indexes.
-
 // Virtual pour les habitudes de l'utilisateur
-// Virtual relationship: connect User -> Habit. The Habit schema stores the
-// reference in the `user` field (ObjectId), so foreignField must be `user`.
 userSchema.virtual('habits', {
   ref: 'Habit',
   localField: '_id',
@@ -98,4 +90,5 @@ userSchema.virtual('habits', {
 
 const User = mongoose.model('User', userSchema);
 
+// 👇 C'EST ICI QUE C'ÉTAIT FAUX. VOICI LA BONNE LIGNE :
 export default User;

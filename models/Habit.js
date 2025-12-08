@@ -1,29 +1,45 @@
-import mongoose from "mongoose";
+// models/Habit.js
+import mongoose from 'mongoose';
 
 const habitSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
+    ref: 'User',
+    required: true
   },
   title: {
     type: String,
-    required: [true, "Le titre de l'habitude est obligatoire"],
+    required: [true, 'Le titre est requis'],
+    trim: true
   },
-  description: String,
+  description: {
+    type: String,
+    trim: true
+  },
+  category: {
+    type: String,
+    enum: ['health', 'work', 'personal', 'learning', 'social', 'other'],
+    default: 'other'
+  },
   frequency: {
     type: String,
-    enum: ["daily", "weekly", "custom"],
-    default: "daily",
+    enum: ['daily', 'weekly', 'monthly', 'custom'],
+    default: 'daily'
   },
   isArchived: {
     type: Boolean,
-    default: false,
+    default: false
   },
   createdAt: {
     type: Date,
-    default: Date.now,
-  },
+    default: Date.now
+  }
+}, {
+  timestamps: true
 });
 
-export const Habit = mongoose.model("Habit", habitSchema);
+const Habit = mongoose.model('Habit', habitSchema);
+
+// 👇 LA SOLUTION MAGIQUE : On exporte des deux façons !
+export { Habit };       // Pour Habitroutes.js (import { Habit })
+export default Habit;   // Pour statsRoutes.js (import Habit)

@@ -3,27 +3,8 @@ import { Habit } from '../models/Habit.js';
 import Habitlog from '../models/Habitlog.js';
 import User from '../models/User.js';
 import validator from 'validator';
-import { updateHabit } from '../controllers/habitController.js';
 
 const router = express.Router();
-
-
-// Route pour mettre à jour une habitude
-router.put('/:habitId', updateHabit);
-
-
-// Route temporaire pour lister toutes les habitudes
-router.get('/list', async (req, res) => {
-  try {
-    const habits = await Habit.find({});
-    res.status(200).json(habits);
-  } catch (error) {
-    res.status(500).json({ message: "Erreur lors de la récupération des habitudes" });
-  }
-});
-
-
-
 
 /**
  * 1) POST /api/habits

@@ -1,23 +1,24 @@
+// models/Habitlog.js
 import mongoose from 'mongoose';
 
 const habitlogSchema = new mongoose.Schema({
-  habitId: {
+  habit: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Habit',
     required: [true, 'L\'habitude est requise'],
     index: true
   },
   
-  userId: {
+  user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: [true, 'L\'utilisateur est requis'],
     index: true
   },
   
-  completedAt: {
+  date: {
     type: Date,
-    required: [true, 'La date de completion est requise'],
+    required: [true, 'La date est requise'],
     default: Date.now,
     index: true
   },
@@ -29,7 +30,13 @@ const habitlogSchema = new mongoose.Schema({
     index: true
   },
   
-  note: {
+  completed: {
+    type: Boolean,
+    default: true,
+    index: true
+  },
+  
+  notes: {
     type: String,
     trim: true,
     maxlength: [300, 'La note ne peut pas dépasser 300 caractères']
@@ -53,22 +60,31 @@ const habitlogSchema = new mongoose.Schema({
     location: String,
     weather: String,
     companions: [String]
+  },
+  
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  
+  updatedAt: {
+    type: Date,
+    default: Date.now
   }
-}, {
-  timestamps: true
 });
 
 // Index composés pour optimiser les requêtes fréquentes
-habitlogSchema.index({ habitId: 1, completedAt: -1 });
-habitlogSchema.index({ userId: 1, completedAt: -1 });
-habitlogSchema.index({ dateString: 1, habitId: 1 }, { unique: true }); // Éviter les doublons par jour
+habitlogSchema.index({ habit: 1, date: -1 });
+habitlogSchema.index({ user: 1, date: -1 });
+habitlogSchema.index({ dateString: 1, habit: 1 }, { unique: true }); // Éviter les doublons par jour
 
 // Middleware pre-save pour générer dateString automatiquement
 habitlogSchema.pre('save', function(next) {
-  if (this.completedAt) {
-    const date = new Date(this.completedAt);
+  if (this.date) {
+    const date = new Date(this.date);
     this.dateString = date.toISOString().split('T')[0];
   }
+  this.updatedAt = new Date();
   next();
 });
 
