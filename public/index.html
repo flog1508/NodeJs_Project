@@ -163,7 +163,7 @@
       <button class="tab-btn" onclick="switchTab('stats')">📊 STATS (Étudiant 4)</button>
     </div>
 
-    <!-- ==================== USERS ==================== -->
+    <!-- USERS -->
     <div id="users" class="tab-content active">
       <div class="section">
         <h2>1️⃣ Créer un utilisateur <span class="badge">POST</span></h2>
@@ -232,7 +232,7 @@
       </div>
     </div>
 
-    <!-- ==================== HABITS ==================== -->
+    <!--  HABITS -->
     <div id="habits" class="tab-content">
       <div class="section">
         <h2>1️⃣ Créer une habitude <span class="badge">POST</span></h2>
@@ -281,7 +281,7 @@
       </div>
     </div>
 
-    <!-- ==================== LOGS ==================== -->
+    <!--  LOGS -->
     <div id="logs" class="tab-content">
       <div class="section">
         <h2>1️⃣ Créer un log <span class="badge">POST</span></h2>
@@ -334,7 +334,7 @@
       </div>
     </div>
 
-    <!-- ==================== STATS ==================== -->
+    <!--  STATS -->
     <div id="stats" class="tab-content">
       <div class="section">
         <h2>1️⃣ Export stats <span class="badge">POST</span></h2>
@@ -412,7 +412,7 @@
       document.getElementById(id).textContent = JSON.stringify(data, null, 2);
     }
 
-    // ========== USERS ==========
+    //  USERS 
     async function createUser() {
       try {
         const res = await fetch(`${API}/users/register`, {
@@ -500,7 +500,7 @@
       }
     }
 
-    // ========== HABITS ==========
+    //  HABITS 
     async function createHabit() {
       try {
         const res = await fetch(`${API}/habits`, {
@@ -527,7 +527,7 @@
           category: document.getElementById('habit_filter_category').value,
           search: document.getElementById('habit_filter_search').value
         });
-        // ✅ CORRIGÉ : /search au lieu de /filters
+        
         const res = await fetch(`${API}/habits/search?${params}`);
         show('result_searchHabits', await res.json());
       } catch (e) {
@@ -537,7 +537,7 @@
 
     async function getHabitStatsByCategory() {
       try {
-        // ✅ CORRIGÉ : /stats/categories au lieu de /analytics/categories
+        ///stats/categories 
         const res = await fetch(`${API}/habits/stats/categories`);
         show('result_getHabitStatsByCategory', await res.json());
       } catch (e) {
@@ -545,7 +545,7 @@
       }
     }
 
-    // ========== LOGS ==========
+    // LOGS 
     async function createLog() {
       try {
         const res = await fetch(`${API}/habitlogs`, {

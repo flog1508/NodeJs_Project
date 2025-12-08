@@ -19,9 +19,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// ============================================
+// 
 // MIDDLEWARES GLOBAUX
-// ============================================
+// 
 
 // CORS
 app.use(cors({
@@ -42,10 +42,9 @@ app.use((req, res, next) => {
   next();
 });
 
-// ============================================
+// 
 // ROUTES API
-// ============================================
-
+// 
 // Route racine
 app.get('/', (req, res) => {
   res.json({
@@ -112,9 +111,9 @@ app.get('/api/docs', (req, res) => {
   });
 });
 
-// ============================================
+// 
 // GESTION DES ERREURS
-// ============================================
+// 
 
 // Route non trouvée (404)
 app.use(notFound);

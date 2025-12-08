@@ -1,5 +1,5 @@
 // controllers/userController.js
-// 🎯 ÉTUDIANT 1 - GESTION UTILISATEURS
+//  FLO - GESTION UTILISATEURS
 
 import User from '../models/User.js';
 import { Habit } from '../models/Habit.js';
@@ -70,7 +70,7 @@ class UserController {
         preferences: preferences || {}
       });
 
-      // 📝 ÉCRITURE FICHIER JSON (Exigence prof)
+      // ÉCRITURE FICHIER JSON (Exigence prof)
       const dataDir = path.join(process.cwd(), 'data');
       if (!fs.existsSync(dataDir)) {
         fs.mkdirSync(dataDir, { recursive: true });
@@ -411,7 +411,7 @@ class UserController {
         });
       }
 
-      // 📖 LECTURE FICHIER JSON
+      // LECTURE FICHIER JSON
       const jsonData = fs.readFileSync(dataPath, 'utf-8');
       const usersData = JSON.parse(jsonData);
 
@@ -536,7 +536,7 @@ class UserController {
         }
       };
 
-      // 📝 ÉCRITURE FICHIER JSON
+      //  ÉCRITURE FICHIER JSON
       const exportsDir = path.join(process.cwd(), 'data', 'exports');
       if (!fs.existsSync(exportsDir)) {
         fs.mkdirSync(exportsDir, { recursive: true });

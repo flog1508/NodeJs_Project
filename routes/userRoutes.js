@@ -6,7 +6,7 @@ import UserController from '../controllers/userController.js';
 
 const router = express.Router();
 
-// 📝 ROUTES ÉTUDIANT 1
+// ROUTES ÉTUDIANT 1
 
 // Route 1 (POST) - Créer un utilisateur
 router.post('/register', UserController.register);

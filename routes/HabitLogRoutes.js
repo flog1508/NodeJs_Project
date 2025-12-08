@@ -4,7 +4,7 @@ import HabitLogController from '../controllers/HabitLogController.js';
 
 const router = express.Router();
 
-// 📝 ROUTES ÉTUDIANT 3
+//  ROUTES ÉTUDIANT 3
 router.post('/', HabitLogController.create);
 router.get('/history', HabitLogController.getHistory);
 router.get('/streaks', HabitLogController.getStreaks);

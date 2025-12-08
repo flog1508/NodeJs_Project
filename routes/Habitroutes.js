@@ -1,12 +1,12 @@
 // routes/Habitroutes.js
-// 🎯 ROUTES HABITUDES - Appelle le controller
+// ROUTES HABITUDES - Appelle le controller
 
 import express from 'express';
 import HabitController from '../controllers/habitController.js';
 
 const router = express.Router();
 
-// 📝 ROUTES ÉTUDIANT 2 - GESTION HABITUDES
+// ROUTES ÉTUDIANT 2 - GESTION HABITUDES
 
 // Route 1 (POST) - Créer une habitude
 router.post('/', HabitController.create);

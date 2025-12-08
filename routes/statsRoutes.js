@@ -6,7 +6,7 @@ import StatsController from '../controllers/statsController.js';
 
 const router = express.Router();
 
-// 📝 ROUTES ÉTUDIANT 4 - STATISTIQUES
+// ROUTES ÉTUDIANT 4 - STATISTIQUES
 
 // Route 1 (POST) - Exporter les statistiques (avec écriture JSON)
 router.post('/export', StatsController.exportStats);

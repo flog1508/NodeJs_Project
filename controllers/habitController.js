@@ -1,5 +1,5 @@
 // controllers/habitController.js
-// 🎯 ÉTUDIANT 2 - GESTION HABITUDES
+// Ines  - GESTION HABITUDES
 
 import { Habit } from '../models/Habit.js';
 import Habitlog from '../models/Habitlog.js';
@@ -96,7 +96,7 @@ class HabitController {
       page = 1,
       limit = 10,
       sortBy = 'createdAt',
-      order = 'desc'  // ✅ CORRIGÉ
+      order = 'desc' 
     } = req.query;
 
     // Construction de la query

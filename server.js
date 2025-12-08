@@ -30,7 +30,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 🔹 SERVIR LES FICHIERS STATIQUES (HTML, CSS, JS)
+// SERVIR LES FICHIERS STATIQUES (HTML, CSS, JS)
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Connexion MongoDB

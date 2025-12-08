@@ -1,5 +1,5 @@
 // controllers/statsController.js
-// 🎯 ÉTUDIANT 4 - GESTION STATISTIQUES CENTRALISÉES
+// Jad - GESTION STATISTIQUES CENTRALISÉES
 
 import StatsService from '../services/statsService.js';
 import fs from 'fs';
@@ -39,7 +39,7 @@ class StatsController {
         }
       };
 
-      // 📝 ÉCRITURE FICHIER JSON (Exigence prof)
+      // ÉCRITURE FICHIER JSON 
       const exportsDir = path.join(process.cwd(), 'data', 'exports');
       if (!fs.existsSync(exportsDir)) {
         fs.mkdirSync(exportsDir, { recursive: true });

@@ -1,5 +1,5 @@
 // controllers/habitLogController.js
-// 🎯 ÉTUDIANT 3 - GESTION LOGS D'HABITUDES
+//  Felix - GESTION LOGS D'HABITUDES
 
 import Habitlog from '../models/Habitlog.js';
 import { Habit } from '../models/Habit.js';
@@ -219,11 +219,11 @@ class HabitLogController {
         });
       }
 
-      // 📖 LECTURE FICHIER JSON
+      //  LECTURE FICHIER JSON
       const jsonData = fs.readFileSync(dataPath, 'utf-8');
        const logsData = JSON.parse(jsonData);
    
-       // ✅ Générer dateString pour chaque log
+       // Générer dateString pour chaque log
        const logsWithDateString = logsData.map(log => ({
          ...log,
          dateString: new Date(log.date).toISOString().split('T')[0]
@@ -271,7 +271,7 @@ class HabitLogController {
         logs
       };
 
-      // 📝 ÉCRITURE FICHIER JSON
+      //  ÉCRITURE FICHIER JSON
       const exportsDir = path.join(process.cwd(), 'data', 'exports');
       if (!fs.existsSync(exportsDir)) {
         fs.mkdirSync(exportsDir, { recursive: true });
