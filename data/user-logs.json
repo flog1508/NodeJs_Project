@@ -76,5 +76,29 @@
     "userId": "6937f1b3a852c00fbbf2a0cf",
     "username": "Rabah",
     "timestamp": "2025-12-09T09:53:55.387Z"
+  },
+  {
+    "action": "USER_CREATED",
+    "userId": "693850d9ff5169cd80cad34a",
+    "username": "Aris",
+    "timestamp": "2025-12-09T16:39:53.807Z"
+  },
+  {
+    "action": "USER_DELETED",
+    "userId": "693850d9ff5169cd80cad34a",
+    "username": "Arista",
+    "timestamp": "2025-12-09T16:40:56.143Z"
+  },
+  {
+    "action": "USER_CREATED",
+    "userId": "69385224f5e374b9ba6bfa3d",
+    "username": "ABc",
+    "timestamp": "2025-12-09T16:45:24.475Z"
+  },
+  {
+    "action": "USER_DELETED",
+    "userId": "69385224f5e374b9ba6bfa3d",
+    "username": "Abri",
+    "timestamp": "2025-12-09T16:46:28.954Z"
   }
 ]
