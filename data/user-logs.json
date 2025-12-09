@@ -58,5 +58,23 @@
     "userId": "693718168adc1f0b7d7f9b85",
     "username": "JPGG",
     "timestamp": "2025-12-08T18:25:26.635Z"
+  },
+  {
+    "action": "USER_DELETED",
+    "userId": "693708f6a09538c09f71919a",
+    "username": "TestUser4",
+    "timestamp": "2025-12-09T01:18:08.389Z"
+  },
+  {
+    "action": "USER_DELETED",
+    "userId": "693708eca09538c09f719197",
+    "username": "TestUser3",
+    "timestamp": "2025-12-09T02:11:16.753Z"
+  },
+  {
+    "action": "USER_CREATED",
+    "userId": "6937f1b3a852c00fbbf2a0cf",
+    "username": "Rabah",
+    "timestamp": "2025-12-09T09:53:55.387Z"
   }
 ]

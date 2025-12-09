@@ -13,7 +13,6 @@ import mongoose from 'mongoose';
 class UserController {
   /**
    * ROUTE 1 (POST) - Créer un utilisateur avec validation
-   * Exigence prof : Route d'écriture
    */
   static async register(req, res) {
     try {
@@ -70,7 +69,7 @@ class UserController {
         preferences: preferences || {}
       });
 
-      // ÉCRITURE FICHIER JSON (Exigence prof)
+      // ÉCRITURE FICHIER JSON (log création utilisateur)
       const dataDir = path.join(process.cwd(), 'data');
       if (!fs.existsSync(dataDir)) {
         fs.mkdirSync(dataDir, { recursive: true });
@@ -86,8 +85,12 @@ class UserController {
 
       let logs = [];
       if (fs.existsSync(logPath)) {
-        const existingLogs = fs.readFileSync(logPath, 'utf-8');
-        logs = JSON.parse(existingLogs);
+        try {
+          const existingLogs = fs.readFileSync(logPath, 'utf-8');
+          logs = JSON.parse(existingLogs);
+        } catch (e) {
+          logs = [];
+        }
       }
       logs.push(logData);
       fs.writeFileSync(logPath, JSON.stringify(logs, null, 2));
@@ -111,7 +114,6 @@ class UserController {
 
   /**
    * ROUTE 2 (GET) - Recherche avancée avec filtres et pagination
-   * Exigence prof : Route de lecture avancée
    */
   static async search(req, res) {
     try {
@@ -149,7 +151,7 @@ class UserController {
         .sort({ [sortBy]: sortOrder })
         .skip(skip)
         .limit(Number(limit))
-        .select('-password'); // Ne pas renvoyer les passwords
+        .select('-password');
 
       // Compte total pour la pagination
       const total = await User.countDocuments(query);
@@ -172,7 +174,6 @@ class UserController {
 
   /**
    * ROUTE 3 (GET) - Agrégation MongoDB : Stats utilisateur
-   * Exigence prof : Route d'agrégation avec $lookup
    */
   static async getStats(req, res) {
     try {
@@ -315,7 +316,6 @@ class UserController {
 
   /**
    * ROUTE 4 (PUT) - Modifier un utilisateur
-   * Route d'écriture supplémentaire
    */
   static async update(req, res) {
     try {
@@ -398,7 +398,6 @@ class UserController {
 
   /**
    * ROUTE 5 (GET) - Lecture fichier JSON (import)
-   * Exigence prof : Lecture de fichier JSON
    */
   static async importFromJson(req, res) {
     try {
@@ -447,6 +446,27 @@ class UserController {
 
       const imported = await User.insertMany(usersToImport);
 
+      // Logger l'import
+      const dataDir = path.join(process.cwd(), 'data');
+      const logPath = path.join(dataDir, 'user-logs.json');
+      const logData = {
+        action: 'USERS_IMPORTED',
+        count: imported.length,
+        timestamp: new Date().toISOString()
+      };
+
+      let logs = [];
+      if (fs.existsSync(logPath)) {
+        try {
+          const existingLogs = fs.readFileSync(logPath, 'utf-8');
+          logs = JSON.parse(existingLogs);
+        } catch (e) {
+          logs = [];
+        }
+      }
+      logs.push(logData);
+      fs.writeFileSync(logPath, JSON.stringify(logs, null, 2));
+
       res.json({
         success: true,
         message: `${imported.length} utilisateurs importés avec succès`,
@@ -464,7 +484,6 @@ class UserController {
 
   /**
    * ROUTE 6 (GET) - Stats globales avec agrégation
-   * Agrégation supplémentaire pour stats admin
    */
   static async getGlobalStats(req, res) {
     try {
@@ -509,7 +528,6 @@ class UserController {
 
   /**
    * ROUTE 7 (GET) - Export stats en JSON
-   * Exigence prof : Écriture de fichier JSON
    */
   static async exportStats(req, res) {
     try {
@@ -536,7 +554,7 @@ class UserController {
         }
       };
 
-      //  ÉCRITURE FICHIER JSON
+      // ÉCRITURE FICHIER JSON
       const exportsDir = path.join(process.cwd(), 'data', 'exports');
       if (!fs.existsSync(exportsDir)) {
         fs.mkdirSync(exportsDir, { recursive: true });
@@ -554,6 +572,58 @@ class UserController {
         file: filename,
         path: exportPath,
         data: exportData
+      });
+
+    } catch (error) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  }
+
+  /**
+   * ROUTE 8 (DELETE) - Supprimer un utilisateur
+   */
+  static async delete(req, res) {
+    try {
+      const { id } = req.params;
+
+      const user = await User.findByIdAndDelete(id);
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          error: 'Utilisateur non trouvé'
+        });
+      }
+
+      // Supprimer aussi toutes les habitudes et logs associés
+      await Habit.deleteMany({ user: id });
+      await Habitlog.deleteMany({ user: id });
+
+      // Logger la suppression
+      const dataDir = path.join(process.cwd(), 'data');
+      const logPath = path.join(dataDir, 'user-logs.json');
+      const logData = {
+        action: 'USER_DELETED',
+        userId: id,
+        username: user.username,
+        timestamp: new Date().toISOString()
+      };
+
+      let logs = [];
+      if (fs.existsSync(logPath)) {
+        try {
+          const existingLogs = fs.readFileSync(logPath, 'utf-8');
+          logs = JSON.parse(existingLogs);
+        } catch (e) {
+          logs = [];
+        }
+      }
+      logs.push(logData);
+      fs.writeFileSync(logPath, JSON.stringify(logs, null, 2));
+
+      res.json({
+        success: true,
+        message: 'Utilisateur et ses données associées supprimés avec succès'
       });
 
     } catch (error) {

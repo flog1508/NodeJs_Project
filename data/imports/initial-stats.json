@@ -1,0 +1,49 @@
+{
+  "globalStats": {
+    "totalUsers": 150,
+    "totalHabits": 500,
+    "totalLogs": 5000,
+    "averageCompletionRate": 75.5,
+    "activeUsers": 120
+  },
+  "categories": [
+    {
+      "name": "santé",
+      "habitCount": 150,
+      "popularity": "high"
+    },
+    {
+      "name": "productivité",
+      "habitCount": 120,
+      "popularity": "high"
+    },
+    {
+      "name": "bien-être",
+      "habitCount": 80,
+      "popularity": "medium"
+    },
+    {
+      "name": "finance",
+      "habitCount": 50,
+      "popularity": "low"
+    }
+  ],
+  "topHabits": [
+    {
+      "title": "Sport quotidien",
+      "category": "santé",
+      "usersCount": 85
+    },
+    {
+      "title": "Méditation",
+      "category": "bien-être",
+      "usersCount": 72
+    },
+    {
+      "title": "Lecture 30min",
+      "category": "productivité",
+      "usersCount": 68
+    }
+  ],
+  "importDate": "2024-12-09T00:00:00Z"
+}

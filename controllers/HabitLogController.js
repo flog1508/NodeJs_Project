@@ -10,7 +10,6 @@ import path from 'path';
 class HabitLogController {
   /**
    * ROUTE 1 (POST) - Créer un log
-   * Exigence prof : Route d'écriture
    */
   static async create(req, res) {
     try {
@@ -23,7 +22,7 @@ class HabitLogController {
         });
       }
 
-      // Vérifier que l'habitude existe
+      // Vérifier que l'habite existe
       const existingHabit = await Habit.findById(habit);
       if (!existingHabit) {
         return res.status(404).json({
@@ -32,11 +31,27 @@ class HabitLogController {
         });
       }
 
+      // Générer dateString
+      const dateObj = date ? new Date(date) : new Date();
+      const dateString = dateObj.toISOString().split('T')[0];
+
+      // Vérifier doublon (habitude + dateString)
+      const duplicate = await Habitlog.findOne({ habit, dateString });
+
+      if (duplicate) {
+        return res.status(409).json({
+          success: false,
+          error: 'Un log existe déjà pour cette habitude ce jour-là',
+          existingLog: duplicate
+        });
+      }
+
       // Créer le log
       const log = await Habitlog.create({
         habit,
         user,
-        date: date || new Date(),
+        date: dateObj,
+        dateString,
         completed: completed !== undefined ? completed : true,
         notes: notes || ''
       });
@@ -58,7 +73,6 @@ class HabitLogController {
 
   /**
    * ROUTE 2 (GET) - Historique avec filtres et pagination
-   * Exigence prof : Route de lecture avancée
    */
   static async getHistory(req, res) {
     try {
@@ -80,7 +94,6 @@ class HabitLogController {
       if (user) query.user = user;
       if (completed !== undefined) query.completed = completed === 'true';
 
-      // Filtres de dates
       if (startDate || endDate) {
         query.date = {};
         if (startDate) query.date.$gte = new Date(startDate);
@@ -117,17 +130,11 @@ class HabitLogController {
 
   /**
    * ROUTE 3 (GET) - Agrégation MongoDB : Streaks par utilisateur
-   * Exigence prof : Route d'agrégation
    */
   static async getStreaks(req, res) {
     try {
       const streaks = await Habitlog.aggregate([
-        // Étape 1 : Trier par utilisateur et date
-        {
-          $sort: { user: 1, date: -1 }
-        },
-
-        // Étape 2 : Grouper par utilisateur
+        { $sort: { user: 1, date: -1 } },
         {
           $group: {
             _id: '$user',
@@ -144,8 +151,6 @@ class HabitLogController {
             }
           }
         },
-
-        // Étape 3 : Lookup pour récupérer les infos user
         {
           $lookup: {
             from: 'users',
@@ -154,13 +159,7 @@ class HabitLogController {
             as: 'userInfo'
           }
         },
-
-        // Étape 4 : Déconstruire userInfo
-        {
-          $unwind: '$userInfo'
-        },
-
-        // Étape 5 : Projection finale
+        { $unwind: '$userInfo' },
         {
           $project: {
             _id: 0,
@@ -175,11 +174,10 @@ class HabitLogController {
                 2
               ]
             },
-            // Calculer le streak (simplifié)
             currentStreak: {
               $size: {
                 $filter: {
-                  input: { $slice: ['$logs', 10] }, // Derniers 10 logs
+                  input: { $slice: ['$logs', 10] },
                   as: 'log',
                   cond: { $eq: ['$$log.completed', true] }
                 }
@@ -187,17 +185,10 @@ class HabitLogController {
             }
           }
         },
-
-        // Étape 6 : Tri par completion rate
-        {
-          $sort: { completionRate: -1 }
-        }
+        { $sort: { completionRate: -1 } }
       ]);
 
-      res.json({
-        success: true,
-        data: streaks
-      });
+      res.json({ success: true, data: streaks });
 
     } catch (error) {
       res.status(500).json({ success: false, error: error.message });
@@ -206,7 +197,6 @@ class HabitLogController {
 
   /**
    * ROUTE 4 (POST) - Import logs depuis JSON
-   * Exigence prof : Lecture fichier JSON
    */
   static async importFromJson(req, res) {
     try {
@@ -219,32 +209,29 @@ class HabitLogController {
         });
       }
 
-      //  LECTURE FICHIER JSON
       const jsonData = fs.readFileSync(dataPath, 'utf-8');
-       const logsData = JSON.parse(jsonData);
-   
-       // Générer dateString pour chaque log
-       const logsWithDateString = logsData.map(log => ({
-         ...log,
-         dateString: new Date(log.date).toISOString().split('T')[0]
-       }));
-   
-       const imported = await Habitlog.insertMany(logsWithDateString);
-   
-       res.json({
-         success: true,
-         message: `${imported.length} logs importés avec succès`,
-         imported: imported.length
-       });
-   
-     } catch (error) {
-       res.status(500).json({ success: false, error: error.message });
-     }
-   }
+      const logsData = JSON.parse(jsonData);
+
+      const logsWithDateString = logsData.map(log => ({
+        ...log,
+        dateString: new Date(log.date).toISOString().split('T')[0]
+      }));
+
+      const imported = await Habitlog.insertMany(logsWithDateString);
+
+      res.json({
+        success: true,
+        message: `${imported.length} logs importés avec succès`,
+        imported: imported.length
+      });
+
+    } catch (error) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  }
 
   /**
    * ROUTE 5 (GET) - Export logs en JSON
-   * Exigence prof : Écriture fichier JSON
    */
   static async exportToJson(req, res) {
     try {
@@ -271,7 +258,6 @@ class HabitLogController {
         logs
       };
 
-      //  ÉCRITURE FICHIER JSON
       const exportsDir = path.join(process.cwd(), 'data', 'exports');
       if (!fs.existsSync(exportsDir)) {
         fs.mkdirSync(exportsDir, { recursive: true });
@@ -292,8 +278,32 @@ class HabitLogController {
 
     } catch (error) {
       res.status(500).json({ success: false, error: error.message });
+    }
+  }
 
+  /**
+   * ROUTE 6 (DELETE) - Supprimer un log
+   */
+  static async delete(req, res) {
+    try {
+      const { id } = req.params;
 
+      const log = await Habitlog.findByIdAndDelete(id);
+
+      if (!log) {
+        return res.status(404).json({
+          success: false,
+          error: 'Log non trouvé'
+        });
+      }
+
+      res.json({
+        success: true,
+        message: 'Log supprimé avec succès'
+      });
+
+    } catch (error) {
+      res.status(500).json({ success: false, error: error.message });
     }
   }
 }

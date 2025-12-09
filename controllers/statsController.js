@@ -1,5 +1,7 @@
 // controllers/statsController.js
-// Jad - GESTION STATISTIQUES CENTRALISÉES
+// 🎯 JAD - GESTION STATISTIQUES GLOBALES ET COMPARATIVES
+// Responsabilité : Stats de toute l'application (top habitudes, comparaisons, vue d'ensemble admin)
+// Différence avec UserController : UserController = stats personnelles d'UN user, StatsController = stats globales
 
 import StatsService from '../services/statsService.js';
 import fs from 'fs';
@@ -8,7 +10,7 @@ import path from 'path';
 class StatsController {
   /**
    * ROUTE 1 (POST) - Exporter les statistiques d'un utilisateur
-   * Exigence prof : Route d'écriture + Écriture fichier JSON
+   * Exigence prof : Route d'écriture avec fichier JSON
    */
   static async exportStats(req, res) {
     try {
@@ -39,7 +41,7 @@ class StatsController {
         }
       };
 
-      // ÉCRITURE FICHIER JSON 
+      // 📝 ÉCRITURE FICHIER JSON
       const exportsDir = path.join(process.cwd(), 'data', 'exports');
       if (!fs.existsSync(exportsDir)) {
         fs.mkdirSync(exportsDir, { recursive: true });
@@ -101,7 +103,7 @@ class StatsController {
   }
 
   /**
-   * ROUTE 3 (GET) - Agrégation MongoDB : Users → Habits
+   * ROUTE 3 (GET) - Agrégation MongoDB : Users avec leurs Habits
    * Exigence prof : Route d'agrégation avec $lookup
    */
   static async getUsersWithHabits(req, res) {
@@ -123,7 +125,7 @@ class StatsController {
 
   /**
    * ROUTE 4 (GET) - Top habitudes (agrégation)
-   * Agrégation supplémentaire
+   * Agrégation supplémentaire : Habitudes les plus populaires
    */
   static async getTopHabits(req, res) {
     try {
@@ -143,6 +145,7 @@ class StatsController {
 
   /**
    * ROUTE 5 (GET) - Vue d'ensemble globale
+   * Stats globales de toute l'application
    */
   static async getOverview(req, res) {
     try {
@@ -160,6 +163,7 @@ class StatsController {
 
   /**
    * ROUTE 6 (GET) - Stats par catégorie
+   * Agrégation supplémentaire : Grouper par catégorie
    */
   static async getStatsByCategory(req, res) {
     try {
@@ -168,6 +172,47 @@ class StatsController {
       res.json({
         success: true,
         data: stats
+      });
+
+    } catch (error) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  }
+
+  /**
+   * ROUTE 7 (POST) - Import stats depuis JSON
+   * Exigence prof : Lecture fichier JSON
+   */
+  static async importStats(req, res) {
+    try {
+      const dataPath = path.join(process.cwd(), 'data', 'imports', 'initial-stats.json');
+
+      if (!fs.existsSync(dataPath)) {
+        return res.status(404).json({
+          success: false,
+          error: 'Fichier initial-stats.json non trouvé dans data/imports/'
+        });
+      }
+
+      // 📖 LECTURE FICHIER JSON
+      const jsonData = fs.readFileSync(dataPath, 'utf-8');
+      const statsData = JSON.parse(jsonData);
+
+      // Optionnel : Traiter/valider les données
+      const { globalStats, categories, topHabits } = statsData;
+
+      // Vous pouvez sauvegarder ces données dans une collection "AppStats" 
+      // ou simplement les retourner pour affichage/traitement
+
+      res.json({
+        success: true,
+        message: `Statistiques importées avec succès`,
+        imported: {
+          globalStats: globalStats || {},
+          categoriesCount: categories?.length || 0,
+          topHabitsCount: topHabits?.length || 0
+        },
+        data: statsData
       });
 
     } catch (error) {

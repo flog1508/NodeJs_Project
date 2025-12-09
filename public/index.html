@@ -43,6 +43,7 @@
       cursor: pointer;
       font-weight: bold;
       transition: all 0.3s;
+      font-size: 14px;
     }
     
     .tab-btn:hover {
@@ -95,6 +96,13 @@
       min-width: 200px;
     }
     
+    input[type="checkbox"] {
+      flex: 0;
+      min-width: auto;
+      width: 20px;
+      height: 20px;
+    }
+    
     textarea {
       min-height: 80px;
       resize: vertical;
@@ -119,6 +127,10 @@
     
     button:active {
       transform: translateY(0);
+    }
+    
+    button.delete {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
     }
     
     .result {
@@ -150,6 +162,10 @@
       font-weight: bold;
       margin-left: 10px;
     }
+    
+    .badge.delete {
+      background: #ef4444;
+    }
   </style>
 </head>
 <body>
@@ -163,48 +179,46 @@
       <button class="tab-btn" onclick="switchTab('stats')">📊 STATS (Étudiant 4)</button>
     </div>
 
-    <!-- USERS -->
+    <!-- ==================== USERS ==================== -->
     <div id="users" class="tab-content active">
       <div class="section">
         <h2>1️⃣ Créer un utilisateur <span class="badge">POST</span></h2>
         <div class="input-row">
-          <input type="text" id="user_username" placeholder="Username" value="alice">
-          <input type="email" id="user_email" placeholder="Email" value="alice@example.com">
-          <input type="password" id="user_password" placeholder="Password" value="password123">
+          <input type="text" id="username" placeholder="Username" value="TestUser">
+          <input type="email" id="email" placeholder="Email" value="test@example.com">
+          <input type="password" id="password" placeholder="Password" value="secret123">
           <button onclick="createUser()">✨ Créer</button>
         </div>
-        <div id="result_createUser" class="result"></div>
+        <div id="createResult" class="result"></div>
       </div>
 
       <div class="section">
         <h2>2️⃣ Rechercher des utilisateurs <span class="badge">GET</span></h2>
         <div class="input-row">
-          <input type="text" id="user_search" placeholder="Rechercher">
-          <input type="number" id="user_page" placeholder="Page" value="1">
-          <input type="number" id="user_limit" placeholder="Limite" value="10">
+          <input type="text" id="searchQuery" placeholder="Rechercher">
+          <input type="number" id="limit" placeholder="Limite" value="5">
           <button onclick="searchUsers()">🔍 Rechercher</button>
         </div>
-        <div id="result_searchUsers" class="result"></div>
+        <div id="searchResult" class="result"></div>
       </div>
 
       <div class="section">
         <h2>3️⃣ Stats utilisateur (Agrégation) <span class="badge">GET</span></h2>
         <div class="input-row">
-          <input type="text" id="user_stats_id" placeholder="ID utilisateur">
+          <input type="text" id="statsUserId" placeholder="ID utilisateur">
           <button onclick="getUserStats()">📊 Voir Stats</button>
         </div>
-        <div id="result_getUserStats" class="result"></div>
+        <div id="statsResult" class="result"></div>
       </div>
 
       <div class="section">
         <h2>4️⃣ Modifier un utilisateur <span class="badge">PUT</span></h2>
         <div class="input-row">
-          <input type="text" id="user_update_id" placeholder="ID utilisateur">
-          <input type="text" id="user_update_username" placeholder="Nouveau username">
-          <input type="email" id="user_update_email" placeholder="Nouvel email">
+          <input type="text" id="userId" placeholder="ID utilisateur">
+          <input type="text" id="newUsername" placeholder="Nouveau username">
           <button onclick="updateUser()">✏️ Modifier</button>
         </div>
-        <div id="result_updateUser" class="result"></div>
+        <div id="updateResult" class="result"></div>
       </div>
 
       <div class="section">
@@ -212,7 +226,7 @@
         <div class="input-row">
           <button onclick="importUsers()">📥 Importer JSON</button>
         </div>
-        <div id="result_importUsers" class="result"></div>
+        <div id="importResult" class="result"></div>
       </div>
 
       <div class="section">
@@ -220,92 +234,107 @@
         <div class="input-row">
           <button onclick="getGlobalStats()">📈 Stats Globales</button>
         </div>
-        <div id="result_getGlobalStats" class="result"></div>
+        <div id="globalStatsResult" class="result"></div>
       </div>
 
       <div class="section">
         <h2>7️⃣ Exporter stats <span class="badge">GET</span></h2>
         <div class="input-row">
-          <button onclick="exportUserStats()">📤 Exporter JSON</button>
+          <button onclick="exportUsers()">📤 Exporter JSON</button>
         </div>
-        <div id="result_exportUserStats" class="result"></div>
+        <div id="exportResult" class="result"></div>
+      </div>
+
+      <div class="section">
+        <h2>8️⃣ Supprimer un utilisateur <span class="badge delete">DELETE</span></h2>
+        <div class="input-row">
+          <input type="text" id="deleteUserId" placeholder="ID utilisateur">
+          <button class="delete" onclick="deleteUser()">🗑️ Supprimer</button>
+        </div>
+        <div id="deleteUserResult" class="result"></div>
       </div>
     </div>
 
-    <!--  HABITS -->
+    <!-- ==================== HABITS ==================== -->
     <div id="habits" class="tab-content">
       <div class="section">
         <h2>1️⃣ Créer une habitude <span class="badge">POST</span></h2>
         <div class="input-row">
-          <input type="text" id="habit_user_id" placeholder="User ID">
-          <input type="text" id="habit_title" placeholder="Titre" value="Faire du sport">
-          <select id="habit_category">
-            <option value="health">Santé</option>
-            <option value="work">Travail</option>
-            <option value="personal">Personnel</option>
-            <option value="learning">Apprentissage</option>
-            <option value="social">Social</option>
-          </select>
-          <input type="text" id="habit_description" placeholder="Description">
-          <select id="habit_frequency">
-            <option value="daily">Quotidien</option>
-            <option value="weekly">Hebdomadaire</option>
-            <option value="monthly">Mensuel</option>
-          </select>
+          <input type="text" id="habitUserId" placeholder="User ID">
+          <input type="text" id="habitTitle" placeholder="Titre" value="Faire du sport">
+          <input type="text" id="habitCategory" placeholder="Catégorie" value="health">
+          <input type="text" id="habitDesc" placeholder="Description">
+          <input type="text" id="habitFreq" placeholder="Fréquence" value="daily">
           <button onclick="createHabit()">✨ Créer</button>
         </div>
-        <div id="result_createHabit" class="result"></div>
+        <div id="habitCreateResult" class="result"></div>
       </div>
 
       <div class="section">
         <h2>2️⃣ Rechercher habitudes <span class="badge">GET</span></h2>
         <div class="input-row">
-          <input type="text" id="habit_filter_user" placeholder="User ID">
-          <select id="habit_filter_category">
-            <option value="">Toutes</option>
-            <option value="health">Santé</option>
-            <option value="work">Travail</option>
-          </select>
-          <input type="text" id="habit_filter_search" placeholder="Recherche">
-          <button onclick="searchHabits()">🔍 Rechercher</button>
+          <input type="text" id="filterUserId" placeholder="User ID">
+          <input type="text" id="filterCategory" placeholder="Catégorie">
+          <input type="text" id="filterSearch" placeholder="Recherche">
+          <input type="number" id="filterLimit" placeholder="Limite" value="5">
+          <button onclick="filterHabits()">🔍 Rechercher</button>
         </div>
-        <div id="result_searchHabits" class="result"></div>
+        <div id="habitFilterResult" class="result"></div>
       </div>
 
       <div class="section">
         <h2>3️⃣ Stats par catégorie <span class="badge">GET</span></h2>
         <div class="input-row">
-          <button onclick="getHabitStatsByCategory()">📊 Stats</button>
+          <button onclick="getHabitStats()">📊 Stats</button>
         </div>
-        <div id="result_getHabitStatsByCategory" class="result"></div>
+        <div id="habitStatsResult" class="result"></div>
+      </div>
+
+      <div class="section">
+        <h2>4️⃣ Habitudes populaires <span class="badge">GET</span></h2>
+        <div class="input-row">
+          <input type="number" id="popularLimit" placeholder="Limite" value="5">
+          <button onclick="getPopularHabits()">🏆 Top</button>
+        </div>
+        <div id="popularHabitsResult" class="result"></div>
+      </div>
+
+      <div class="section">
+        <h2>5️⃣ Supprimer une habitude <span class="badge delete">DELETE</span></h2>
+        <div class="input-row">
+          <input type="text" id="deleteHabitId" placeholder="ID habitude">
+          <button class="delete" onclick="deleteHabit()">🗑️ Supprimer</button>
+        </div>
+        <div id="deleteHabitResult" class="result"></div>
       </div>
     </div>
 
-    <!--  LOGS -->
+    <!-- ==================== LOGS ==================== -->
     <div id="logs" class="tab-content">
       <div class="section">
         <h2>1️⃣ Créer un log <span class="badge">POST</span></h2>
         <div class="input-row">
-          <input type="text" id="log_habit_id" placeholder="ID Habitude">
-          <input type="text" id="log_user_id" placeholder="ID User">
-          <input type="date" id="log_date">
-          <select id="log_completed">
-            <option value="true">✅ Complété</option>
-            <option value="false">❌ Raté</option>
-          </select>
+          <input type="text" id="logHabitId" placeholder="Habit ID">
+          <input type="text" id="logUserId" placeholder="User ID">
+          <label style="display: flex; align-items: center; gap: 5px;">
+            <input type="checkbox" id="logCompleted" checked>
+            <span>Complété</span>
+          </label>
+          <input type="text" id="logNotes" placeholder="Notes">
           <button onclick="createLog()">✨ Créer</button>
         </div>
-        <div id="result_createLog" class="result"></div>
+        <div id="createLogResult" class="result"></div>
       </div>
 
       <div class="section">
         <h2>2️⃣ Historique <span class="badge">GET</span></h2>
         <div class="input-row">
-          <input type="text" id="log_filter_habit" placeholder="ID Habitude">
-          <input type="text" id="log_filter_user" placeholder="ID User">
-          <button onclick="getLogHistory()">🔍 Voir</button>
+          <input type="text" id="historyUserId" placeholder="User ID">
+          <input type="text" id="historyHabitId" placeholder="Habit ID">
+          <input type="number" id="historyLimit" placeholder="Limite" value="10">
+          <button onclick="getHistory()">🔍 Voir</button>
         </div>
-        <div id="result_getLogHistory" class="result"></div>
+        <div id="historyResult" class="result"></div>
       </div>
 
       <div class="section">
@@ -313,7 +342,7 @@
         <div class="input-row">
           <button onclick="getStreaks()">🔥 Streaks</button>
         </div>
-        <div id="result_getStreaks" class="result"></div>
+        <div id="streaksResult" class="result"></div>
       </div>
 
       <div class="section">
@@ -321,20 +350,29 @@
         <div class="input-row">
           <button onclick="importLogs()">📥 Importer</button>
         </div>
-        <div id="result_importLogs" class="result"></div>
+        <div id="importLogsResult" class="result"></div>
       </div>
 
       <div class="section">
         <h2>5️⃣ Export logs <span class="badge">GET</span></h2>
         <div class="input-row">
-          <input type="text" id="log_export_user" placeholder="User ID">
+          <input type="text" id="exportLogsUserId" placeholder="User ID">
           <button onclick="exportLogs()">📤 Exporter</button>
         </div>
-        <div id="result_exportLogs" class="result"></div>
+        <div id="exportLogsResult" class="result"></div>
+      </div>
+
+      <div class="section">
+        <h2>6️⃣ Supprimer un log <span class="badge delete">DELETE</span></h2>
+        <div class="input-row">
+          <input type="text" id="deleteLogId" placeholder="ID log">
+          <button class="delete" onclick="deleteLog()">🗑️ Supprimer</button>
+        </div>
+        <div id="deleteLogResult" class="result"></div>
       </div>
     </div>
 
-    <!--  STATS -->
+    <!-- ==================== STATS ==================== -->
     <div id="stats" class="tab-content">
       <div class="section">
         <h2>1️⃣ Export stats <span class="badge">POST</span></h2>
@@ -395,11 +433,19 @@
         </div>
         <div id="result_getStatsByCategory" class="result"></div>
       </div>
+
+      <div class="section">
+        <h2>7️⃣ Importer stats <span class="badge">POST</span></h2>
+        <div class="input-row">
+          <button onclick="importStats()">📥 Importer JSON</button>
+        </div>
+        <div id="result_importStats" class="result"></div>
+      </div>
     </div>
   </div>
 
   <script>
-    const API = 'http://localhost:5000/api';
+    const API_URL = "http://localhost:5000/api";
 
     function switchTab(tabName) {
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -412,271 +458,312 @@
       document.getElementById(id).textContent = JSON.stringify(data, null, 2);
     }
 
-    //  USERS 
+    // ==================== USERS ====================
     async function createUser() {
+      const username = document.getElementById("username").value;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
       try {
-        const res = await fetch(`${API}/users/register`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            username: document.getElementById('user_username').value,
-            email: document.getElementById('user_email').value,
-            password: document.getElementById('user_password').value
-          })
+        const res = await fetch(`${API_URL}/users/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, email, password })
         });
-        show('result_createUser', await res.json());
+        show("createResult", await res.json());
       } catch (e) {
-        show('result_createUser', { error: e.message });
+        show("createResult", { error: e.message });
       }
     }
 
     async function searchUsers() {
+      const search = document.getElementById("searchQuery").value;
+      const limit = document.getElementById("limit").value;
       try {
-        const params = new URLSearchParams({
-          search: document.getElementById('user_search').value,
-          page: document.getElementById('user_page').value,
-          limit: document.getElementById('user_limit').value
-        });
-        const res = await fetch(`${API}/users/search?${params}`);
-        show('result_searchUsers', await res.json());
+        const res = await fetch(`${API_URL}/users/search?search=${search}&limit=${limit}`);
+        show("searchResult", await res.json());
       } catch (e) {
-        show('result_searchUsers', { error: e.message });
+        show("searchResult", { error: e.message });
       }
     }
 
     async function getUserStats() {
+      const userId = document.getElementById("statsUserId").value;
+      if (!userId) return alert("ID requis");
       try {
-        const id = document.getElementById('user_stats_id').value;
-        if (!id) return alert('ID requis');
-        const res = await fetch(`${API}/users/${id}/stats`);
-        show('result_getUserStats', await res.json());
+        const res = await fetch(`${API_URL}/users/${userId}/stats`);
+        show("statsResult", await res.json());
       } catch (e) {
-        show('result_getUserStats', { error: e.message });
+        show("statsResult", { error: e.message });
       }
     }
 
     async function updateUser() {
+      const userId = document.getElementById("userId").value;
+      const newUsername = document.getElementById("newUsername").value;
+      if (!userId) return alert("ID requis");
       try {
-        const id = document.getElementById('user_update_id').value;
-        if (!id) return alert('ID requis');
-        const res = await fetch(`${API}/users/${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            username: document.getElementById('user_update_username').value,
-            email: document.getElementById('user_update_email').value
-          })
+        const res = await fetch(`${API_URL}/users/${userId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: newUsername })
         });
-        show('result_updateUser', await res.json());
+        show("updateResult", await res.json());
       } catch (e) {
-        show('result_updateUser', { error: e.message });
+        show("updateResult", { error: e.message });
       }
     }
 
     async function importUsers() {
       try {
-        const res = await fetch(`${API}/users/import`);
-        show('result_importUsers', await res.json());
+        const res = await fetch(`${API_URL}/users/import`);
+        show("importResult", await res.json());
       } catch (e) {
-        show('result_importUsers', { error: e.message });
+        show("importResult", { error: e.message });
       }
     }
 
     async function getGlobalStats() {
       try {
-        const res = await fetch(`${API}/users/stats/global`);
-        show('result_getGlobalStats', await res.json());
+        const res = await fetch(`${API_URL}/users/stats/global`);
+        show("globalStatsResult", await res.json());
       } catch (e) {
-        show('result_getGlobalStats', { error: e.message });
+        show("globalStatsResult", { error: e.message });
       }
     }
 
-    async function exportUserStats() {
+    async function exportUsers() {
       try {
-        const res = await fetch(`${API}/users/stats/export`);
-        show('result_exportUserStats', await res.json());
+        const res = await fetch(`${API_URL}/users/stats/export`);
+        show("exportResult", await res.json());
       } catch (e) {
-        show('result_exportUserStats', { error: e.message });
+        show("exportResult", { error: e.message });
       }
     }
 
-    //  HABITS 
+    async function deleteUser() {
+      const userId = document.getElementById("deleteUserId").value;
+      if (!userId) return alert("ID requis");
+      if (!confirm("Supprimer cet utilisateur ?")) return;
+      try {
+        const res = await fetch(`${API_URL}/users/${userId}`, { method: "DELETE" });
+        show("deleteUserResult", await res.json());
+      } catch (e) {
+        show("deleteUserResult", { error: e.message });
+      }
+    }
+
+    // ==================== HABITS ====================
     async function createHabit() {
+      const user = document.getElementById("habitUserId").value;
+      const title = document.getElementById("habitTitle").value;
+      const category = document.getElementById("habitCategory").value;
+      const description = document.getElementById("habitDesc").value;
+      const frequency = document.getElementById("habitFreq").value;
       try {
-        const res = await fetch(`${API}/habits`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            user: document.getElementById('habit_user_id').value,
-            title: document.getElementById('habit_title').value,
-            category: document.getElementById('habit_category').value,
-            description: document.getElementById('habit_description').value,
-            frequency: document.getElementById('habit_frequency').value
-          })
+        const res = await fetch(`${API_URL}/habits`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user, title, category, description, frequency }),
         });
-        show('result_createHabit', await res.json());
+        show("habitCreateResult", await res.json());
       } catch (e) {
-        show('result_createHabit', { error: e.message });
+        show("habitCreateResult", { error: e.message });
       }
     }
 
-    async function searchHabits() {
+    async function filterHabits() {
+      const user = document.getElementById("filterUserId").value;
+      const category = document.getElementById("filterCategory").value;
+      const search = document.getElementById("filterSearch").value;
+      const limit = document.getElementById("filterLimit").value;
+      const query = new URLSearchParams({ user, category, search, limit });
       try {
-        const params = new URLSearchParams({
-          user: document.getElementById('habit_filter_user').value,
-          category: document.getElementById('habit_filter_category').value,
-          search: document.getElementById('habit_filter_search').value
-        });
-        
-        const res = await fetch(`${API}/habits/search?${params}`);
-        show('result_searchHabits', await res.json());
+        const res = await fetch(`${API_URL}/habits/search?${query}`);
+        show("habitFilterResult", await res.json());
       } catch (e) {
-        show('result_searchHabits', { error: e.message });
+        show("habitFilterResult", { error: e.message });
       }
     }
 
-    async function getHabitStatsByCategory() {
+    async function getHabitStats() {
       try {
-        ///stats/categories 
-        const res = await fetch(`${API}/habits/stats/categories`);
-        show('result_getHabitStatsByCategory', await res.json());
+        const res = await fetch(`${API_URL}/habits/stats/categories`);
+        show("habitStatsResult", await res.json());
       } catch (e) {
-        show('result_getHabitStatsByCategory', { error: e.message });
+        show("habitStatsResult", { error: e.message });
       }
     }
 
-    // LOGS 
+    async function getPopularHabits() {
+      const limit = document.getElementById("popularLimit").value;
+      try {
+        const res = await fetch(`${API_URL}/habits/stats/popular?limit=${limit}`);
+        show("popularHabitsResult", await res.json());
+      } catch (e) {
+        show("popularHabitsResult", { error: e.message });
+      }
+    }
+
+    async function deleteHabit() {
+      const habitId = document.getElementById("deleteHabitId").value;
+      if (!habitId) return alert("ID requis");
+      if (!confirm("Supprimer cette habitude ?")) return;
+      try {
+        const res = await fetch(`${API_URL}/habits/${habitId}`, { method: "DELETE" });
+        show("deleteHabitResult", await res.json());
+      } catch (e) {
+        show("deleteHabitResult", { error: e.message });
+      }
+    }
+
+    // ==================== LOGS ====================
     async function createLog() {
+      const habit = document.getElementById("logHabitId").value;
+      const user = document.getElementById("logUserId").value;
+      const completed = document.getElementById("logCompleted").checked;
+      const notes = document.getElementById("logNotes").value;
+      if (!habit || !user) return alert("Habit ID et User ID requis");
       try {
-        const res = await fetch(`${API}/habitlogs`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            habit: document.getElementById('log_habit_id').value,
-            user: document.getElementById('log_user_id').value,
-            date: document.getElementById('log_date').value,
-            completed: document.getElementById('log_completed').value === 'true'
-          })
+        const res = await fetch(`${API_URL}/habitlogs`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ habit, user, completed, notes })
         });
-        show('result_createLog', await res.json());
+        show("createLogResult", await res.json());
       } catch (e) {
-        show('result_createLog', { error: e.message });
+        show("createLogResult", { error: e.message });
       }
     }
 
-    async function getLogHistory() {
+    async function getHistory() {
+      const user = document.getElementById("historyUserId").value;
+      const habit = document.getElementById("historyHabitId").value;
+      const limit = document.getElementById("historyLimit").value;
+      const query = new URLSearchParams({ user, habit, limit });
       try {
-        const params = new URLSearchParams({
-          habit: document.getElementById('log_filter_habit').value,
-          user: document.getElementById('log_filter_user').value
-        });
-        const res = await fetch(`${API}/habitlogs/history?${params}`);
-        show('result_getLogHistory', await res.json());
+        const res = await fetch(`${API_URL}/habitlogs/history?${query}`);
+        show("historyResult", await res.json());
       } catch (e) {
-        show('result_getLogHistory', { error: e.message });
+        show("historyResult", { error: e.message });
       }
     }
 
     async function getStreaks() {
       try {
-        const res = await fetch(`${API}/habitlogs/streaks`);
-        show('result_getStreaks', await res.json());
+        const res = await fetch(`${API_URL}/habitlogs/streaks`);
+        show("streaksResult", await res.json());
       } catch (e) {
-        show('result_getStreaks', { error: e.message });
+        show("streaksResult", { error: e.message });
       }
     }
 
     async function importLogs() {
       try {
-        const res = await fetch(`${API}/habitlogs/import`, { method: 'POST' });
-        show('result_importLogs', await res.json());
+        const res = await fetch(`${API_URL}/habitlogs/import`, { method: "POST" });
+        show("importLogsResult", await res.json());
       } catch (e) {
-        show('result_importLogs', { error: e.message });
+        show("importLogsResult", { error: e.message });
       }
     }
 
     async function exportLogs() {
+      const userId = document.getElementById("exportLogsUserId").value;
       try {
-        const params = new URLSearchParams({
-          userId: document.getElementById('log_export_user').value
-        });
-        const res = await fetch(`${API}/habitlogs/export?${params}`);
-        show('result_exportLogs', await res.json());
+        const res = await fetch(`${API_URL}/habitlogs/export?userId=${userId}`);
+        show("exportLogsResult", await res.json());
       } catch (e) {
-        show('result_exportLogs', { error: e.message });
+        show("exportLogsResult", { error: e.message });
       }
     }
 
-    // ========== STATS ==========
+    async function deleteLog() {
+      const logId = document.getElementById("deleteLogId").value;
+      if (!logId) return alert("ID requis");
+      if (!confirm("Supprimer ce log ?")) return;
+      try {
+        const res = await fetch(`${API_URL}/habitlogs/${logId}`, { method: "DELETE" });
+        show("deleteLogResult", await res.json());
+      } catch (e) {
+        show("deleteLogResult", { error: e.message });
+      }
+    }
+
+    // ==================== STATS ====================
     async function exportStatistics() {
       try {
-        const res = await fetch(`${API}/stats/export`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        const res = await fetch(`${API_URL}/stats/export`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            userId: document.getElementById('stats_export_user').value,
-            period: document.getElementById('stats_export_period').value
+            userId: document.getElementById("stats_export_user").value,
+            period: document.getElementById("stats_export_period").value
           })
         });
-        show('result_exportStatistics', await res.json());
+        show("result_exportStatistics", await res.json());
       } catch (e) {
-        show('result_exportStatistics', { error: e.message });
+        show("result_exportStatistics", { error: e.message });
       }
     }
 
     async function getDashboard() {
       try {
         const params = new URLSearchParams({
-          userId: document.getElementById('stats_dashboard_user').value,
-          period: document.getElementById('stats_dashboard_period').value
+          userId: document.getElementById("stats_dashboard_user").value,
+          period: document.getElementById("stats_dashboard_period").value
         });
-        const res = await fetch(`${API}/stats/dashboard?${params}`);
-        show('result_getDashboard', await res.json());
+        const res = await fetch(`${API_URL}/stats/dashboard?${params}`);
+        show("result_getDashboard", await res.json());
       } catch (e) {
-        show('result_getDashboard', { error: e.message });
+        show("result_getDashboard", { error: e.message });
       }
     }
 
     async function getUsersWithHabits() {
       try {
-        const limit = document.getElementById('stats_aggregation_limit').value;
-        const res = await fetch(`${API}/stats/aggregation?limit=${limit}`);
-        show('result_getUsersWithHabits', await res.json());
+        const limit = document.getElementById("stats_aggregation_limit").value;
+        const res = await fetch(`${API_URL}/stats/aggregation?limit=${limit}`);
+        show("result_getUsersWithHabits", await res.json());
       } catch (e) {
-        show('result_getUsersWithHabits', { error: e.message });
+        show("result_getUsersWithHabits", { error: e.message });
       }
     }
 
     async function getStatsTopHabits() {
       try {
-        const limit = document.getElementById('stats_top_limit').value;
-        const res = await fetch(`${API}/stats/top-habits?limit=${limit}`);
-        show('result_getStatsTopHabits', await res.json());
+        const limit = document.getElementById("stats_top_limit").value;
+        const res = await fetch(`${API_URL}/stats/top-habits?limit=${limit}`);
+        show("result_getStatsTopHabits", await res.json());
       } catch (e) {
-        show('result_getStatsTopHabits', { error: e.message });
+        show("result_getStatsTopHabits", { error: e.message });
       }
     }
 
     async function getOverview() {
       try {
-        const res = await fetch(`${API}/stats/overview`);
-        show('result_getOverview', await res.json());
+        const res = await fetch(`${API_URL}/stats/overview`);
+        show("result_getOverview", await res.json());
       } catch (e) {
-        show('result_getOverview', { error: e.message });
+        show("result_getOverview", { error: e.message });
       }
     }
 
     async function getStatsByCategory() {
       try {
-        const res = await fetch(`${API}/stats/categories`);
-        show('result_getStatsByCategory', await res.json());
+        const res = await fetch(`${API_URL}/stats/categories`);
+        show("result_getStatsByCategory", await res.json());
       } catch (e) {
-        show('result_getStatsByCategory', { error: e.message });
+        show("result_getStatsByCategory", { error: e.message });
       }
     }
 
-    // Auto-set today's date
-    document.getElementById('log_date').valueAsDate = new Date();
+    async function importStats() {
+      try {
+        const res = await fetch(`${API_URL}/stats/import`, { method: "POST" });
+        show("result_importStats", await res.json());
+      } catch (e) {
+        show("result_importStats", { error: e.message });
+      }
+    }
   </script>
 </body>
 </html>

@@ -26,4 +26,8 @@ router.get('/overview', StatsController.getOverview);
 // Route 6 (GET) - Stats par catégorie
 router.get('/categories', StatsController.getStatsByCategory);
 
+// Route 7 (GET) - Stats imports
+
+router.post('/import', StatsController.importStats); 
+
 export default router;

@@ -29,4 +29,7 @@ router.get('/stats/global', UserController.getGlobalStats);
 // Route 7 (GET) - Export stats en JSON
 router.get('/stats/export', UserController.exportStats);
 
+// Route 8 (DELETE) - Supprimer un utilisateur 
+router.delete('/:id', UserController.delete)
+
 export default router;
